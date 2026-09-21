@@ -1,0 +1,59 @@
+---
+# Gated deploy entry point (T-003, REQ-004).
+# Order is load-bearing: pre_tasks run the conflict gate on localhost BEFORE
+# any device task, so a conflict aborts with zero SSH opened (REQ-003).
+# The configuration wave is block/rescue/always: post-check failure stops the
+# wave and runs rollback.yml, then records FAILED (REQ-004, OPS-001).
+- name: NetAut gated deploy
+  hosts: ios
+  gather_facts: false
+  vars:
+    netaut_intended: "{{ playbook_dir }}/../../netbox/intended/sample.yml"
+    # render-only: gates + preview run device-less (CI, --check).
+    # live: roles push to devices. Flip per wave in the wave record, never here.
+    netaut_mode: render-only
+    # Drill switch for the stop/rollback wiring proof (reports/T-003.txt).
+    netaut_force_postcheck_fail: false
+  pre_tasks:
+    - name: Load intended state on localhost
+      ansible.builtin.set_fact:
+        netaut_all: "{{ lookup('ansible.builtin.file', netaut_intended) | from_yaml }}"
+      delegate_to: localhost
+      run_once: true
+
+    - name: Conflict gate (aborts before any device connection)
+      ansible.builtin.include_role:
+        name: verify
+  tasks:
+    - name: Configuration wave
+      block:
+        - name: Apply common settings
+          ansible.builtin.include_role:
+            name: common
+          vars:
+            netaut_common: "{{ (hostvars.localhost.netaut_all.devices | selectattr('name', 'equalto', inventory_hostname) | first).common }}"
+          when: netaut_mode == 'live'
+
+        - name: Apply VLAN and interfaces
+          ansible.builtin.include_role:
+            name: vlan_interface
+          vars:
+            netaut_vlans: "{{ hostvars.localhost.netaut_all.vlans }}"
+            netaut_interfaces: "{{ (hostvars.localhost.netaut_all.devices | selectattr('name', 'equalto', inventory_hostname) | first).interfaces }}"
+          when: netaut_mode == 'live'
+
+        - name: Post-check wave result matches intended
+          ansible.builtin.assert:
+            that:
+              - not netaut_force_postcheck_fail
+            fail_msg: "post-check FAILED (drill or drift); stopping wave for rollback"
+      rescue:
+        - name: Roll back the wave
+          ansible.builtin.include_tasks: rollback.yml
+        - name: Record FAILED result
+          ansible.builtin.fail:
+            msg: "deploy FAILED after rollback; see wave record"
+      always:
+        - name: Wave result marker
+          ansible.builtin.debug:
+            msg: "wave finished for {{ inventory_hostname }} (mode={{ netaut_mode }})"

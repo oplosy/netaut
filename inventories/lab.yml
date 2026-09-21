@@ -16,4 +16,7 @@ all:
             ansible_become: true
             ansible_become_method: enable
       vars:
-        ansible_user: "{{ vault_lab_user }}"
+        # Vault value wins when provided; placeholder keeps device-less gate
+        # runs working without a live secret (ACR-001). No connection opens
+        # in render-only mode.
+        ansible_user: "{{ vault_lab_user | default('netaut') }}"

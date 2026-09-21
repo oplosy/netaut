@@ -1,0 +1,17 @@
+---
+# Reusable conflict gate (T-003). Runs fully on localhost against local files;
+# no device connection is opened by this role (REQ-003).
+- name: Pre-check intended state for conflicts (fail closed)
+  ansible.builtin.command:
+    cmd: >-
+      python3 {{ verify_precheck_path }}
+      --input {{ verify_intended }}
+  delegate_to: localhost
+  run_once: true
+  changed_when: false
+  # Gates must execute even in --check: skipping the gate in dry-run would
+  # prove nothing about the wiring (found in T-003 V2).
+  check_mode: false
+  vars:
+    verify_precheck_path: "{{ playbook_dir }}/../../roles/verify/files/precheck.py"
+    verify_intended: "{{ netaut_intended }}"

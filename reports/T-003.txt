@@ -1,0 +1,45 @@
+COMPLETION REPORT — T-003 (pre-check / deploy / post-check gates + rollback)
+Executor: ORCHESTRATOR (single-agent sequential run). Baseline: v1.
+
+## Files created (all inside owns, outside must_not_touch)
+- roles/verify/files/precheck.py (offline conflict gate: dup names, unknown
+  refs, vlan range/name clash, overlapping prefixes; stdlib + yaml only)
+- roles/verify/tasks/main.yml (reusable gate role: localhost, run_once,
+  check_mode false so --check proves the wiring)
+- roles/verify/tests/test_precheck.py (6 tests: clean sample + 4 seeded
+  conflicts + no-network-imports)
+- playbooks/deploy/site.yml (pre_tasks gate, block/rescue/always wave,
+  render-only default, drill switch)
+- playbooks/deploy/rollback.yml (drill marker now; live restore fail-closed
+  until T-004 backup integration)
+- docs/orchestration/change-requests/ACR-001.md (cross-task one-line fix auth)
+
+## Verification (orchestrator rerun)
+V1 pytest roles/verify/tests/ -q -> 6 passed. A1 satisfied; the no-imports
+test proves the gate cannot open device connections by construction.
+V2 site.yml --check --diff (clean sample) -> exit 0, gate task ok on
+localhost, live roles skipped in render-only, post-check passed. A2 wiring
+satisfied.
+Drill (extra, -e netaut_force_postcheck_fail=true, no --check): post-check
+failed -> rescue ran -> /tmp markers written for lab-sw01 + lab-sw02 ->
+FAILED recorded (failed=1, rescued=1, exit 2). Markers cleaned up. A2 proven
+end to end. No secret strings in any output (INV-001).
+
+## Fixes found during execution (all recorded, none silent)
+1. ACR-001: inventory vault var broke device-less runs; one-line default
+   filter, live behavior unchanged.
+2. Gate skipped under --check until check_mode:false was set; initial V2
+   green was hollow, rerun after fix proves the gate in-path.
+
+## Review (HIGH task requirement)
+reports/reviews/T-003.md: REVIEW_AGENT APPROVE with 2 accepted limitations
+(precheck is intended-only; render-only post-check is wiring assert).
+
+## Invariants / risks
+INV-001 preserved (no credential vars/values in any new file; Vault-only per
+ADR-003). INV-004 preserved (precheck + role asserts fail closed before
+deploy). RISK-001/RISK-002/OPS-001 addressed.
+
+## Out of scope respected
+Nothing under templates/, netbox/, scripts/, .github/ touched (one-line
+inventory amendment via ACR-001 only).
