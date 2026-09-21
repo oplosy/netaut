@@ -1,0 +1,9 @@
+# yamllint policy (T-005 hygiene). Relaxed where strictness adds no safety:
+# long Jinja lines and missing document-start markers are normal here.
+extends: default
+rules:
+  line-length: disable
+  document-start: disable
+  truthy:
+    allowed-values: ["true", "false", "on"]
+    check-keys: false
