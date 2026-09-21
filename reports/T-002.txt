@@ -1,0 +1,31 @@
+COMPLETION REPORT — T-002 (VLAN/interface model with isolated vendor render)
+Executor: ORCHESTRATOR (single-agent sequential run). Baseline: v1.
+
+## Files created (all inside owns, outside must_not_touch)
+- roles/vlan_interface/defaults/main.yml (null defaults, fail-closed)
+- roles/vlan_interface/tasks/main.yml (assert + ios_vlans + ios_l2_interfaces)
+- roles/vlan_interface/tests/test_render.py (A1 rerender + A2 content tests)
+- templates/ios/vlan_interface.j2 (raw IOS CLI render, no logic)
+
+## Verification (orchestrator rerun)
+V1 render idempotency -> IDENTICAL lab-sw01 + lab-sw02 (124 bytes each).
+  A1 satisfied.
+V2 pytest roles/vlan_interface/tests/ -q -> 2 passed. A2 satisfied
+  (vlan 99, name MGMT, interface + access vlan lines present).
+Extra: role play --syntax-check -> exit 0 (WSL ansible-core 2.21.4,
+  cisco.ios 11.6.0 modules resolve).
+
+## Deviation (minor, non-architectural, same class as T-000/T-001)
+Spec V1 cmd points at scripts/render_idempotency.py, owned by T-005.
+Interim temp-dir check ran the identical property; canonical script in T-005
+re-proves it. Rollback cost: none.
+
+## Invariants / risks
+INV-003 preserved: role holds module args only, zero Jinja2/CLI strings;
+raw syntax isolated in templates/ios/. Role and template consume the same
+intended-state shape, so both paths converge on one effective config.
+RISK-001 addressed: null defaults + pre-assert block invented VLANs.
+
+## Out of scope respected
+Nothing under netbox/, playbooks/, scripts/, inventories/ touched.
+EOS vendor dir deferred (no EOS lab device in ASM-002 scope).

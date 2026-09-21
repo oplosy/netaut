@@ -1,0 +1,5 @@
+---
+# Inputs come from intended state (netbox/intended/*.yml). Null defaults fail
+# closed in the role pre-assert; the role never invents VLANs (INV-004).
+netaut_vlans: null
+netaut_interfaces: null

@@ -1,0 +1,29 @@
+---
+# VLAN/interface business logic (T-002). Module arguments only: no Jinja2
+# template syntax and no raw CLI strings here (INV-003). Raw rendering lives
+# in templates/<vendor>/ and must produce the same effective config.
+- name: Require VLAN and interface inputs from intended state (fail closed)
+  ansible.builtin.assert:
+    that:
+      - netaut_vlans is sequence
+      - netaut_vlans | length > 0
+      - netaut_interfaces is sequence
+      - netaut_interfaces | length > 0
+    fail_msg: "netaut_vlans and netaut_interfaces must be set from intended state"
+
+- name: Ensure VLANs exist
+  cisco.ios.ios_vlans:
+    config:
+      - vlan_id: "{{ item.id }}"
+        name: "{{ item.name }}"
+    state: merged
+  loop: "{{ netaut_vlans }}"
+
+- name: Ensure access interfaces
+  cisco.ios.ios_l2_interfaces:
+    config:
+      - name: "{{ item.name }}"
+        access:
+          vlan: "{{ item.access_vlan }}"
+    state: merged
+  loop: "{{ netaut_interfaces }}"
