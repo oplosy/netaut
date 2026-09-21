@@ -1,0 +1,9 @@
+# Normalize line endings to LF on checkin (repo was born on Windows).
+* text=auto eol=lf
+*.yml text
+*.yaml text
+*.j2 text
+*.md text
+*.py text
+*.cfg text
+*.ini text
