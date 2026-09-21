@@ -1,0 +1,38 @@
+id: T-004
+title: Idempotency proof and read-only drift detection
+implements: [REQ-005, REQ-006]
+preserves: [INV-002]
+addresses: [OPS-001]
+baseline: v1
+depends_on: [T-003]
+owns:
+  - playbooks/drift/
+  - roles/drift/
+must_not_touch:
+  - templates/
+  - netbox/
+  - scripts/
+  - inventories/
+shared_owner: false
+risk: MODERATE
+review_required: false
+objective: >
+  Second-run no-change proof plus read-only drift job comparing operational
+  facts against intended state.
+acceptance:
+  - id: A1
+    text: Second consecutive run reports no-change on lab.
+    verified_by: V1
+  - id: A2
+    text: Seeded drift is detected and reported without pushing config.
+    verified_by: V2
+verify:
+  - id: V1
+    cmd: pytest roles/drift/tests/test_idempotency.py -q
+    expect: exit 0
+  - id: V2
+    cmd: ansible-playbook playbooks/drift/report.yml --check -i inventories/lab.yml
+    expect: exit 0
+out_of_scope:
+  - Remediation push from drift (explicit non-goal)
+  - CI gates (T-005)

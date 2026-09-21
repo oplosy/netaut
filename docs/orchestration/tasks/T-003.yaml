@@ -1,0 +1,38 @@
+id: T-003
+title: Pre-check deploy post-check gates with rollback
+implements: [REQ-003, REQ-004]
+preserves: [INV-001, INV-004]
+addresses: [RISK-001, RISK-002, OPS-001]
+baseline: v1
+depends_on: [T-002]
+owns:
+  - playbooks/deploy/
+  - roles/verify/
+must_not_touch:
+  - templates/
+  - netbox/
+  - scripts/
+  - .github/
+shared_owner: false
+risk: HIGH
+review_required: true
+objective: >
+  Gated deploy: conflict pre-check aborts before SSH, post-check failure
+  stops the wave and runs rollback, secrets masked end to end.
+acceptance:
+  - id: A1
+    text: Seeded IP/VLAN conflict aborts before any device connection.
+    verified_by: V1
+  - id: A2
+    text: Forced post-check failure triggers rollback and FAILED record with masked secrets.
+    verified_by: V2
+verify:
+  - id: V1
+    cmd: pytest roles/verify/tests/test_precheck.py -q
+    expect: exit 0
+  - id: V2
+    cmd: ansible-playbook playbooks/deploy/site.yml --check --diff -i inventories/lab.yml
+    expect: exit 0
+out_of_scope:
+  - Drift reporting (T-004)
+  - CI wiring (T-005)

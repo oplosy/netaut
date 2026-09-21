@@ -1,0 +1,15 @@
+# Secrets — never commit (INV-001)
+.vault_pass
+*.vault
+.vault/
+# Ansible runtime
+*.retry
+*.log
+# Python
+__pycache__/
+*.pyc
+.venv/
+# Lab / local state
+.containerlab/
+reports/drift-*.md
+!reports/.gitkeep

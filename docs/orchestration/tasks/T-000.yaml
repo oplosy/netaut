@@ -1,0 +1,39 @@
+id: T-000
+title: Scaffold repo, inventory skeleton and audit convention
+implements: [REQ-007]
+preserves: [INV-001]
+addresses: [RISK-002]
+baseline: v1
+depends_on: []
+owns:
+  - inventories/
+  - ansible.cfg
+  - requirements.yml
+must_not_touch:
+  - roles/
+  - playbooks/
+  - templates/
+  - scripts/
+shared_owner: false
+risk: LOW
+review_required: false
+objective: >
+  Versioned repo layout with lab inventory skeleton and Git audit convention
+  (commit, requester, diff, result) ready for all later tasks.
+acceptance:
+  - id: A1
+    text: Lab inventory graph renders from inventories/lab.yml.
+    verified_by: V1
+  - id: A2
+    text: No secret material exists in scaffold or git history.
+    verified_by: V2
+verify:
+  - id: V1
+    cmd: ansible-inventory -i inventories/lab.yml --graph
+    expect: exit 0
+  - id: V2
+    cmd: python scripts/secret_scan.py --root .
+    expect: exit 0
+out_of_scope:
+  - NetBox sync logic (T-001)
+  - Any vendor template (T-002)

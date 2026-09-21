@@ -1,0 +1,38 @@
+id: T-002
+title: VLAN interface model with isolated vendor render
+implements: [REQ-002]
+preserves: [INV-003]
+addresses: [RISK-001]
+baseline: v1
+depends_on: [T-001]
+owns:
+  - roles/vlan_interface/
+  - templates/
+must_not_touch:
+  - netbox/
+  - playbooks/
+  - scripts/
+  - inventories/
+shared_owner: false
+risk: MODERATE
+review_required: false
+objective: >
+  VLAN/interface rendering where business logic stays in the role and
+  vendor syntax stays in templates/ per vendor, byte-identical on rerun.
+acceptance:
+  - id: A1
+    text: Same intended input renders byte-identical output twice.
+    verified_by: V1
+  - id: A2
+    text: Rendered diff test passes for IOS sample.
+    verified_by: V2
+verify:
+  - id: V1
+    cmd: python scripts/render_idempotency.py --input netbox/intended/sample.yml --vendor ios
+    expect: exit 0
+  - id: V2
+    cmd: pytest roles/vlan_interface/tests/ -q
+    expect: exit 0
+out_of_scope:
+  - Deploy and rollback (T-003)
+  - Routing policy (DEFERRED REQ-008)

@@ -1,0 +1,38 @@
+id: T-001
+title: Intended-state model plus NTP DNS Syslog common role
+implements: [REQ-001, REQ-002]
+preserves: [INV-002, INV-003]
+addresses: [RISK-001]
+baseline: v1
+depends_on: [T-000]
+owns:
+  - netbox/
+  - roles/common/
+must_not_touch:
+  - templates/
+  - playbooks/
+  - scripts/
+  - .github/
+shared_owner: false
+risk: MODERATE
+review_required: false
+objective: >
+  Validated intended-state schema with NetBox export cache and vendor-neutral
+  NTP/DNS/Syslog role as the first low-risk vertical slice.
+acceptance:
+  - id: A1
+    text: Schema validation passes on sample intended state.
+    verified_by: V1
+  - id: A2
+    text: Common role syntax-checks and renders without vendor leakage.
+    verified_by: V2
+verify:
+  - id: V1
+    cmd: python scripts/validate_model.py --schema netbox/schema.yml --input netbox/intended/sample.yml
+    expect: exit 0
+  - id: V2
+    cmd: ansible-playbook roles/common/tests/test.yml --syntax-check
+    expect: exit 0
+out_of_scope:
+  - VLAN and interface logic (T-002)
+  - Deploy gating (T-003)

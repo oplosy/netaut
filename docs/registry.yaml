@@ -1,0 +1,95 @@
+project: netaut
+tier: HIGH
+tier_rationale: >
+  Network automation holds privileged write authority over devices plus device
+  credentials. A mis-rendered template can cause material service harm (lab-wide
+  outage, and production outage if reused). Secrets dimension alone maps to HIGH.
+  Reversibility is partial/costly without exercised rollback. Exposure is currently
+  lab-only, which bounds blast radius but does not remove write authority.
+shared_paths: []
+
+requirements:
+  REQ-001:
+    text: Intended-state data model covers device, interface, prefix, VLAN, VRF and site.
+    level: MUST
+    status: ACTIVE
+    source: owner scope statement
+  REQ-002:
+    text: Vendor-compatible configuration is generated from the source of truth via Jinja2 with no manual device edits.
+    level: MUST
+    status: ACTIVE
+    source: owner scope statement
+  REQ-003:
+    text: Pre-check blocks IP and VLAN conflicts before any device is contacted.
+    level: MUST
+    status: ACTIVE
+    source: owner proof criteria
+  REQ-004:
+    text: Deploy runs pre-check, deploy, post-check with safe stop and rollback when post-check fails.
+    level: MUST
+    status: ACTIVE
+    source: owner proof criteria
+  REQ-005:
+    text: Re-running the same change produces no unnecessary configuration (idempotent).
+    level: MUST
+    status: ACTIVE
+    source: owner proof criteria
+  REQ-006:
+    text: Drift between operational device state and intended state is detected and reported.
+    level: MUST
+    status: ACTIVE
+    source: owner scope statement
+  REQ-007:
+    text: Every change is traceable via Git commit, requester, diff and result record.
+    level: MUST
+    status: ACTIVE
+    source: owner proof criteria
+  REQ-008:
+    text: Routing-policy automation.
+    level: SHOULD
+    status: DEFERRED
+    source: owner phase plan (phase 3, out of initial scope)
+
+invariants:
+  INV-001:
+    text: Secrets never appear in Git history or generated artifacts.
+    status: ACTIVE
+    verification:
+      - method: test
+        ref: T-003
+      - method: review
+        ref: docs/architecture.md
+  INV-002:
+    text: Intended state and device-read operational state are separate models and never conflated.
+    status: ACTIVE
+    verification:
+      - method: review
+        ref: docs/architecture.md
+  INV-003:
+    text: Common data model and vendor-specific render layer are never mixed.
+    status: ACTIVE
+    verification:
+      - method: review
+        ref: docs/architecture.md
+  INV-004:
+    text: Invalid critical configuration fails clearly before any deploy step.
+    status: ACTIVE
+    verification:
+      - method: test
+        ref: T-003
+
+risks:
+  RISK-001:
+    text: Mis-rendered template causes device or lab-wide outage.
+    status: ACTIVE
+  RISK-002:
+    text: Device credentials leak via repo, logs or artifacts.
+    status: ACTIVE
+
+operational_requirements:
+  OPS-001:
+    text: Lab rollout is staged with exercised rollback.
+    status: ACTIVE
+  OPS-002:
+    text: CI gates render, lint, test and dry-run before merge.
+    status: ACTIVE
