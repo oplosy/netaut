@@ -1,0 +1,39 @@
+id: T-007
+title: Static routes plus prefix-list route-map policy render
+implements: [REQ-008]
+preserves: [INV-003, INV-005]
+addresses: [RISK-001]
+baseline: v1
+depends_on: [T-002]
+owns:
+  - roles/routing/
+  - templates/ios/routing/
+must_not_touch:
+  - netbox/
+  - playbooks/
+  - scripts/
+  - inventories/
+shared_owner: false
+risk: MODERATE
+review_required: false
+objective: >
+  Static-route and prefix-list/route-map rendering from intended state with
+  policy validation (no dangling prefix-list references), vendor syntax
+  isolated in templates/.
+acceptance:
+  - id: A1
+    text: Same policy input renders byte-identical output twice and carries expected lines.
+    verified_by: V1
+  - id: A2
+    text: Extended sample still validates against the schema.
+    verified_by: V2
+verify:
+  - id: V1
+    cmd: pytest roles/routing/tests/ -q
+    expect: exit 0
+  - id: V2
+    cmd: python scripts/validate_model.py --schema netbox/schema.yml --input netbox/intended/sample.yml
+    expect: exit 0
+out_of_scope:
+  - Live neighbors, OSPF, BGP (explicit non-goals per ACR-004)
+  - Remediation push from policy drift

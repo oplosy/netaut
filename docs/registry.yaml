@@ -45,10 +45,10 @@ requirements:
     status: ACTIVE
     source: owner proof criteria
   REQ-008:
-    text: Routing-policy automation.
-    level: SHOULD
-    status: DEFERRED
-    source: owner phase plan (phase 3, out of initial scope)
+    text: Static-route plus prefix-list and route-map policy automation.
+    level: MUST
+    status: ACTIVE
+    source: owner phase plan (phase 3 active per ACR-004; OSPF/BGP excluded)
 
 invariants:
   INV-001:
@@ -77,6 +77,12 @@ invariants:
     verification:
       - method: test
         ref: T-003
+  INV-005:
+    text: Every route-map prefix-list reference names a prefix-list defined in intended state.
+    status: ACTIVE
+    verification:
+      - method: test
+        ref: T-007
 
 risks:
   RISK-001:

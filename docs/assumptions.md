@@ -11,5 +11,5 @@ Statuses: ASSUMED | OWNER_DECISION_REQUIRED | CONFIRMED | REJECTED | EXTERNALLY_
 | ASM-003 | PRODUCT | Repository stays private until license is selected | no public release | Publishing blocked until owner selects license | OWNER | OWNER_DECISION_REQUIRED | NO |
 | ASM-004 | TECHNICAL | NetBox is the intended-state source of truth | NetBox + YAML export cache | Data model and sync tasks change | ORCHESTRATOR | ASSUMED | NO |
 | ASM-005 | RISK | Device secrets live in Vault / Ansible Vault, never in Git | Ansible Vault + CI masked vars | Secret handling and audit tasks change | OWNER | CONFIRMED | NO |
-| ASM-006 | TECHNICAL | Phase 1 device scope is NTP, DNS, Syslog only; VLAN/interface phase 2; routing DEFERRED | phase plan per REQ-008 | Task graph and gates change | ORCHESTRATOR | ASSUMED | NO |
+| ASM-006 | TECHNICAL | Phase 1 NTP/DNS/Syslog, phase 2 VLAN/interface, phase 3 routing ACTIVE as static + prefix-list/route-map only (ACR-004); OSPF/BGP excluded | phase plan per REQ-008 | Task graph and gates change | ORCHESTRATOR | ASSUMED | NO |
 | ASM-007 | PRODUCT | Live device execution out of scope; proof chain is CI + dry-run + drill | fixtures only | Live waves need a new task + image procurement | OWNER | CONFIRMED | NO |
