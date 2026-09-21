@@ -1,0 +1,10 @@
+# Local hygiene hooks. CI runs yamllint + secret scan directly (see
+# .github/workflows/ci.yml); pre-commit is the same net for local commits.
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-yaml
+      - id: detect-private-key
