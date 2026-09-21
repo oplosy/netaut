@@ -62,4 +62,4 @@ See `docs/architecture.md` (ARCH_BASELINE v1), `docs/decisions/`,
 
 ## Scope phases
 
-1. NTP / DNS / Syslog (done) → 2. VLAN / interface (done) → 3. Routing policy (deferred, REQ-008).
+1. NTP / DNS / Syslog (done) → 2. VLAN / interface (done) → 3. Static routing + policy (done, REQ-008; OSPF/BGP excluded).
