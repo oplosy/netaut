@@ -1,0 +1,39 @@
+# Sample intended state, lab site (T-001). Desired state only (INV-002).
+# No secrets in this file (INV-001); credentials come from Vault at runtime.
+sites:
+  - name: LAB-DC1
+    description: Containerlab test site
+vrfs:
+  - name: MGMT
+    rd: "65000:99"
+vlans:
+  - id: 99
+    name: MGMT
+    vrf: MGMT
+prefixes:
+  - prefix: 10.0.0.0/24
+    vlan: 99
+    vrf: MGMT
+devices:
+  - name: lab-sw01
+    site: LAB-DC1
+    platform: ios
+    interfaces:
+      - name: GigabitEthernet0/0
+        description: mgmt-uplink
+        access_vlan: 99
+    common:
+      ntp_servers: [10.0.0.53]
+      dns_servers: [10.0.0.53]
+      syslog_servers: [10.0.0.54]
+  - name: lab-sw02
+    site: LAB-DC1
+    platform: ios
+    interfaces:
+      - name: GigabitEthernet0/0
+        description: mgmt-uplink
+        access_vlan: 99
+    common:
+      ntp_servers: [10.0.0.53]
+      dns_servers: [10.0.0.53]
+      syslog_servers: [10.0.0.54]

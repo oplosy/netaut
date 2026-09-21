@@ -1,0 +1,35 @@
+---
+# Vendor-neutral common settings (T-001). Business logic only; no Jinja2
+# template syntax and no per-vendor CLI strings here (INV-003). Vendor
+# differences are abstracted by collection modules; raw templates live in
+# templates/<vendor>/ (T-002).
+- name: Require common settings from intended state (fail closed)
+  ansible.builtin.assert:
+    that:
+      - netaut_common is mapping
+      - netaut_common.ntp_servers | default([]) | length > 0
+      - netaut_common.dns_servers | default([]) | length > 0
+      - netaut_common.syslog_servers | default([]) | length > 0
+    fail_msg: "netaut_common.(ntp|dns|syslog)_servers must be set from intended state"
+
+- name: Configure NTP servers
+  cisco.ios.ios_ntp_global:
+    config:
+      servers:
+        - server: "{{ item }}"
+    state: merged
+  loop: "{{ netaut_common.ntp_servers }}"
+
+- name: Configure DNS name servers
+  cisco.ios.ios_system:
+    config:
+      name_servers: "{{ netaut_common.dns_servers }}"
+    state: merged
+
+- name: Configure syslog hosts
+  cisco.ios.ios_logging_global:
+    config:
+      hosts:
+        - hostname: "{{ item }}"
+    state: merged
+  loop: "{{ netaut_common.syslog_servers }}"

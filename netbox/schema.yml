@@ -1,0 +1,19 @@
+# Intended-state schema contract v1 (T-001, REQ-001).
+# Side A only: desired state. Operational facts (side B) never live here (INV-002).
+# Validator: scripts/validate_model.py (canonical, T-005). Interim: inline check
+# in reports/T-001.txt enforcing the rules below.
+required_top_level: [sites, vrfs, vlans, prefixes, devices]
+rules:
+  sites: each entry needs name
+  vrfs: each entry needs name and rd
+  vlans: each entry needs id (1-4094), name, vrf (must reference vrfs[].name)
+  prefixes: each entry needs valid CIDR prefix plus vlan and vrf references
+  devices:
+    required: [name, site, platform, interfaces, common]
+    site_must_reference: sites[].name
+    platform_allowed: [ios]
+    interfaces: each entry needs name; access_vlan must reference vlans[].id
+    common: needs ntp_servers, dns_servers, syslog_servers (non-empty IP lists)
+forbidden_here:
+  - operational facts (gathered state, uptimes, live counters)
+  - secrets of any kind (INV-001)

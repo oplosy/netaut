@@ -1,0 +1,4 @@
+---
+# Must be overridden from intended state (netbox/intended/*.yml).
+# Null default fails closed in the role pre-assert (INV-004).
+netaut_common: null

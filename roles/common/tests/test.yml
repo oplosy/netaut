@@ -1,0 +1,11 @@
+---
+- name: Common role syntax test
+  hosts: ios
+  gather_facts: false
+  roles:
+    - role: common
+      vars:
+        netaut_common:
+          ntp_servers: [10.0.0.53]
+          dns_servers: [10.0.0.53]
+          syslog_servers: [10.0.0.54]
