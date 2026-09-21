@@ -1,0 +1,53 @@
+# NetAut merge gates (T-005, OPS-002). Every push and PR runs the full chain;
+# merge requires green. Secrets come from GitHub Secrets / Vault only and are
+# masked in logs; no secret value ever appears in this file (INV-001).
+name: netaut-gates
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install control-node dependencies
+        run: |
+          python -m pip install pyyaml pytest jinja2 ansible-core
+          ansible-galaxy collection install -r requirements.yml
+
+      - name: Secret scan (fail closed, masked output)
+        run: python scripts/secret_scan.py --root .
+
+      - name: Validate intended-state model
+        run: python scripts/validate_model.py --schema netbox/schema.yml --input netbox/intended/sample.yml
+
+      - name: Prove render idempotency
+        run: python scripts/render_idempotency.py --input netbox/intended/sample.yml --vendor ios --repo .
+
+      - name: Role and gate test suites
+        run: python -m pytest roles -q
+
+      - name: Ansible syntax checks
+        env:
+          ANSIBLE_ROLES_PATH: roles
+        run: |
+          ansible-playbook roles/common/tests/test.yml -i inventories/lab.yml --syntax-check
+          ansible-playbook playbooks/deploy/site.yml -i inventories/lab.yml --syntax-check
+          ansible-playbook playbooks/drift/report.yml -i inventories/lab.yml --syntax-check
+
+      - name: Deploy dry run (render-only, no devices touched)
+        env:
+          ANSIBLE_ROLES_PATH: roles
+        run: ansible-playbook playbooks/deploy/site.yml -i inventories/lab.yml --check --diff
+
+      - name: Drift dry run (read-only)
+        env:
+          ANSIBLE_ROLES_PATH: roles
+        run: ansible-playbook playbooks/drift/report.yml -i inventories/lab.yml --check

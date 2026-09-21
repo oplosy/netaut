@@ -1,0 +1,45 @@
+COMPLETION REPORT — T-005 (CI gates + audit evidence + secret scan)
+Executor: ORCHESTRATOR (single-agent sequential run). Baseline: v1.
+
+## Files created (all inside owns, outside must_not_touch)
+- scripts/secret_scan.py (fail-closed masked scanner: location + pattern
+  name only, never content; exit 1 on hits)
+- scripts/validate_model.py (canonical schema validator, promotes T-001 check)
+- scripts/render_idempotency.py (canonical rerender proof, promotes T-002 check)
+- scripts/ci_gate.py (local gate chain: workflow parse, scan, validate,
+  idempotency, full pytest; exit 0 only all green)
+- .github/workflows/ci.yml (push/PR job: same chain + ansible syntax checks
+  + deploy/drift dry runs on ubuntu runner)
+- docs/orchestration/change-requests/ACR-002.md (cross-task amendment auth)
+
+## Verification (orchestrator rerun)
+V1 ci_gate -> OK: scan clean, validate OK, idempotency identical both
+devices, pytest 13 passed, workflow parses with jobs. A1 satisfied.
+V2 secret_scan --root . -> exit 0 clean. Seeded drill (temp dir only, never
+the repo, cleaned up): 3 seeded items flagged, exit 1, output carried zero
+secret values. A2 satisfied with masking proven.
+Regression: deploy --check --diff and drift --check rerun green after ACR-002.
+
+## Fixes found during execution (recorded, none silent)
+1. Scanner flagged a committed vault filename reference in ansible.cfg.
+   ACR-002 removed it; runtime provisioning via flag/env only.
+2. Scanner docs discussed the removed setting using its literal shape and
+   tripped itself; reworded. Lesson recorded: security docs must not quote
+   secret-adjacent config shapes literally.
+3. Drill exposed a real detection gap: snake_case assignments slipped the
+   word-boundary pattern. Pattern widened; drill then caught 3/3 while the
+   repo stayed clean.
+
+## Limitations (accepted)
+ci.yml has not yet run on GitHub hosted runners (action versions and runner
+behavior UNVERIFIED until first green run); every step in it was executed
+locally on equivalent tooling (WSL ubuntu + ansible-core 2.21.4).
+
+## Invariants / risks
+INV-001 preserved and now enforced mechanically on every push. REQ-007
+implemented: convention (T-000) + per-wave evidence (reports/) + CI chain
+(this task). OPS-002/RISK-002 addressed.
+
+## Out of scope respected
+Only scripts/ + .github/ created (two one-line amendments outside owns via
+ACR-001/ACR-002, both authorized in writing).
