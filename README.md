@@ -44,8 +44,10 @@ ansible-playbook playbooks/deploy/site.yml -i inventories/lab.yml --check --diff
 ansible-playbook playbooks/drift/report.yml -i inventories/lab.yml --check
 ```
 
-Live waves flip `netaut_mode: live` per wave record and provide Vault
+Live waves would flip `netaut_mode: live` per wave record with Vault
 credentials at runtime (`--vault-password-file`, never committed).
+Live execution is currently out of scope (ACR-003: no licensed device image);
+everything below is proven device-less.
 
 ## Proof it works
 

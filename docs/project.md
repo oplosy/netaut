@@ -6,9 +6,11 @@ detection. Requirements and invariants live in `registry.yaml`; this file
 references IDs and does not restate them.
 
 ## Understanding
-Owner operates lab network devices (starting 2x IOSv under Containerlab) and
-wants the same change to be safe to re-run, blocked on conflict before touching
-devices, and fully traceable. Users: owner (operator) + CI (executor).
+Owner automates lab network device config (NTP/DNS/Syslog, VLAN/interface)
+and wants the same change to be safe to re-run, blocked on conflict before
+touching devices, and fully traceable. Live device execution is out of scope
+per ACR-003 (no licensed image); proof is CI + dry-run + drill against
+fixtures. Users: owner (operator) + CI (executor).
 Distribution: private repo, lab-only operation (ASM-001, ASM-003).
 
 ## Risk tier
