@@ -14,6 +14,12 @@ rules:
     platform_allowed: [ios]
     interfaces: each entry needs name; access_vlan must reference vlans[].id
     common: needs ntp_servers, dns_servers, syslog_servers (non-empty IP lists)
+  # Optional since T-007 (REQ-008, ACR-004). Enforced by policy_check, not by
+  # validate_model (which ignores unknown top-level keys).
+  static_routing:
+    static_routes: each entry needs valid CIDR prefix + next-hop IP (name optional)
+    prefix_lists: each entry needs name + sequences (seq int, action permit/deny, prefix CIDR)
+    route_maps: match_prefix_list must reference prefix_lists[].name (INV-005)
 forbidden_here:
   - operational facts (gathered state, uptimes, live counters)
   - secrets of any kind (INV-001)

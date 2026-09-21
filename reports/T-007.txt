@@ -1,0 +1,36 @@
+COMPLETION REPORT — T-007 (static routes + prefix-list/route-map render)
+Executor: ORCHESTRATOR (single-agent sequential run). Baseline: v1.
+
+## Files created (all inside owns, outside must_not_touch)
+- roles/routing/defaults/main.yml (null defaults, fail-closed)
+- roles/routing/tasks/main.yml (assert + ios_static_routes + ios_prefix_lists
+  + ios_route_maps, subelements loops, no CLI strings)
+- roles/routing/files/policy_check.py (CIDR/IP shapes + reference integrity,
+  stdlib + yaml only; exit 0/1)
+- roles/routing/tests/test_routing.py (5 tests: rerender, content,
+  policy-clean, dangling-ref, no-network-imports)
+- templates/ios/routing/static.j2 (raw IOS render, no logic)
+- netbox/intended/sample.yml + netbox/schema.yml extended under ACR-004
+  (static routing sections; schema documents them as optional)
+
+## Verification (orchestrator rerun)
+V1 pytest roles/routing/tests/ -q -> 5 passed. A1 satisfied; INV-005 proven
+(seeded dangling reference fails with exit 1).
+V2 validate_model on extended sample -> OK. A2 satisfied; pre-existing model
+checks unaffected by the new optional sections.
+Extra: role play --syntax-check -> exit 0; rendered-state argspec proof ->
+all 4 asserts passed with zero device contact.
+
+## Bug found during execution (recorded, none silent)
+Rendered proof caught a real argspec defect: ios_route_maps takes
+`route_map`, not `name`. Fixed in role + proof, rerun green. Without the
+rendered-state technique this would have survived to the first live wave.
+
+## Invariants / risks
+INV-003 preserved (role module-args only; raw syntax in templates/).
+INV-005 enforced by policy_check + test. RISK-001 addressed (fail-closed
+defaults + asserts; neighbors/OSPF/BGP explicitly excluded).
+
+## Out of scope respected
+Nothing under playbooks/, scripts/, inventories/ touched (sample/schema via
+ACR-004 only). No live neighbors configured anywhere.

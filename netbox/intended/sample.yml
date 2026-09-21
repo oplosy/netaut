@@ -37,3 +37,22 @@ devices:
       ntp_servers: [10.0.0.53]
       dns_servers: [10.0.0.53]
       syslog_servers: [10.0.0.54]
+# Static routing policy (T-007, REQ-008, ACR-004). Global sections applied
+# per host by roles/routing when live. Neighbors/OSPF/BGP excluded.
+static_routes:
+  - prefix: 192.0.2.0/24
+    next_hop: 10.0.0.1
+    name: LAB-WAN
+prefix_lists:
+  - name: PL-LAB-LOCAL
+    description: lab local prefixes
+    sequences:
+      - seq: 5
+        action: permit
+        prefix: 10.0.0.0/24
+route_maps:
+  - name: RM-LAB-OUT
+    sequences:
+      - seq: 10
+        action: permit
+        match_prefix_list: PL-LAB-LOCAL

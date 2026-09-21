@@ -1,0 +1,14 @@
+{% for r in netaut_static_routes %}
+ip route {{ r.prefix }} {{ r.next_hop }}{% if r.name %} name {{ r.name }}{% endif %}
+{% endfor %}
+{% for pl in netaut_prefix_lists %}
+{% for s in pl.sequences %}
+ip prefix-list {{ pl.name }} seq {{ s.seq }} {{ s.action }} {{ s.prefix }}
+{% endfor %}
+{% endfor %}
+{% for rm in netaut_route_maps %}
+{% for s in rm.sequences %}
+route-map {{ rm.name }} {{ s.action }} {{ s.seq }}
+ match ip address prefix-list {{ s.match_prefix_list }}
+{% endfor %}
+{% endfor %}

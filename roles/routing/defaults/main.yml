@@ -1,0 +1,6 @@
+---
+# Must be overridden from intended state. Null defaults fail closed in the
+# role pre-assert; the role never invents routes or policy (INV-004).
+netaut_static_routes: null
+netaut_prefix_lists: null
+netaut_route_maps: null
