@@ -19,8 +19,11 @@ jobs:
 
       - name: Install control-node dependencies
         run: |
-          python -m pip install pyyaml pytest jinja2 ansible-core
+          python -m pip install pyyaml pytest jinja2 ansible-core yamllint
           ansible-galaxy collection install -r requirements.yml
+
+      - name: YAML lint
+        run: python -m yamllint -c .yamllint.yml .
 
       - name: Secret scan (fail closed, masked output)
         run: python scripts/secret_scan.py --root .
