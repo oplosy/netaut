@@ -1,0 +1,18 @@
+---
+# Read-only drift report (T-004, REQ-006). No push tasks exist in this play
+# by design: detection only, remediation is an explicit later decision.
+- name: NetAut drift report
+  hosts: ios
+  gather_facts: false
+  vars:
+    drift_intended: "{{ playbook_dir }}/../../netbox/intended/sample.yml"
+    drift_operational: "{{ playbook_dir }}/snapshots/clean.json"
+    drift_report: /tmp/netaut-drift-report.md
+  tasks:
+    - name: Run drift detection (localhost, read-only)
+      ansible.builtin.include_role:
+        name: drift
+
+    - name: Show report headline
+      ansible.builtin.debug:
+        msg: "{{ lookup('ansible.builtin.file', drift_report).splitlines()[:8] }}"

@@ -1,0 +1,26 @@
+{
+  "devices": {
+    "lab-sw01": {
+      "vlans": [{"id": 99, "name": "MGMT-RENAMED"}],
+      "interfaces": [
+        {"name": "GigabitEthernet0/0", "access_vlan": 99},
+        {"name": "GigabitEthernet0/1", "access_vlan": 99}
+      ],
+      "common": {
+        "ntp_servers": ["10.0.0.53"],
+        "dns_servers": ["10.0.0.53"],
+        "syslog_servers": ["10.0.0.99"]
+      }
+    },
+    "lab-sw02": {
+      "vlans": [{"id": 99, "name": "MGMT"}],
+      "interfaces": [{"name": "GigabitEthernet0/0", "access_vlan": 99}],
+      "common": {
+        "ntp_servers": ["10.0.0.53"],
+        "dns_servers": ["10.0.0.53"],
+        "syslog_servers": ["10.0.0.54"]
+      }
+    }
+  },
+  "provenance": "seeded-drift fixture for A2 (vlan rename + rogue interface + syslog change)"
+}

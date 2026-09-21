@@ -6,5 +6,5 @@ tasks:
   T-001: {status: DONE, validated_baseline: v1, attempts: 1, assigned_to: ORCHESTRATOR, verified_by: ORCHESTRATOR, verification_evidence: reports/T-001.txt}
   T-002: {status: DONE, validated_baseline: v1, attempts: 1, assigned_to: ORCHESTRATOR, verified_by: ORCHESTRATOR, verification_evidence: reports/T-002.txt}
   T-003: {status: DONE, validated_baseline: v1, attempts: 1, assigned_to: ORCHESTRATOR, verified_by: ORCHESTRATOR, verification_evidence: reports/T-003.txt, reviewed_by: REVIEW_AGENT, review_evidence: reports/reviews/T-003.md}
-  T-004: {status: READY, validated_baseline: v1, attempts: 0, assigned_to: null}
-  T-005: {status: PLANNED, validated_baseline: v1, attempts: 0, assigned_to: null}
+  T-004: {status: DONE, validated_baseline: v1, attempts: 1, assigned_to: ORCHESTRATOR, verified_by: ORCHESTRATOR, verification_evidence: reports/T-004.txt}
+  T-005: {status: READY, validated_baseline: v1, attempts: 0, assigned_to: null}

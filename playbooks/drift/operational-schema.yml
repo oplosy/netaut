@@ -1,0 +1,17 @@
+# Operational-state model, side B (T-004, INV-002).
+# Shape of facts gathered read-only from devices. Never merged into
+# netbox/intended/*.yml; comparison happens only inside the drift tool, which
+# treats intended as expectation and operational as observation.
+devices:
+  "<hostname>":
+    vlans:
+      - id: 99
+        name: MGMT
+    interfaces:
+      - name: GigabitEthernet0/0
+        access_vlan: 99
+    common:
+      ntp_servers: [10.0.0.53]
+      dns_servers: [10.0.0.53]
+      syslog_servers: [10.0.0.54]
+provenance: facts gathered read-only (live) or fixture snapshots (CI)

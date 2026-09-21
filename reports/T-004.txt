@@ -1,0 +1,41 @@
+COMPLETION REPORT — T-004 (idempotency proof + read-only drift detection)
+Executor: ORCHESTRATOR (single-agent sequential run). Baseline: v1.
+
+## Files created (all inside owns, outside must_not_touch)
+- roles/drift/files/drift.py (offline compare intended vs operational
+  snapshot; stdlib + yaml only; exits 0 clean / 2 drift / 1 error)
+- roles/drift/tasks/main.yml (localhost run_once wrapper; drift rc 2 is a
+  finding, only rc 1 fails; check_mode false)
+- roles/drift/tests/test_idempotency.py (5 tests: clean, rerun-identical,
+  inputs-untouched, seeded-drift, no-network-imports)
+- playbooks/drift/report.yml (detection-only play; zero push tasks by design)
+- playbooks/drift/operational-schema.yml (side-B shape contract, INV-002)
+- playbooks/drift/snapshots/clean.json (mirrors sample; CI fixture)
+- playbooks/drift/snapshots/drifted.json (seeded: vlan rename + rogue
+  interface + syslog change)
+
+## Verification (orchestrator rerun)
+V1 pytest roles/drift/tests/ -q -> 5 passed. A1 satisfied (consecutive runs
+byte-identical + clean); A2 unit-level satisfied (rc 2, all three seeded
+diffs reported).
+V2 report.yml --check -> exit 0, headline NO DRIFT on clean snapshot. A2
+wiring satisfied; no push task exists anywhere in the drift path.
+Read-only proof: input file hashes identical before/after runs.
+
+## Bug found during execution (recorded, none silent)
+Tests caught a real defect: device-level compare looked for vlans inside the
+device dict while VLANs are top-level in the model. Fixed by passing global
+VLANs into diff_device; suite green after fix.
+
+## Limitations (accepted)
+Snapshots are committed fixtures, not live gathers (no live devices yet);
+live gather populates the same side-B schema without code change.
+
+## Invariants / risks
+INV-002 preserved: side-B schema separate file, never merged into intended;
+tool treats intended as expectation, operational as observation. OPS-001
+addressed: drift report is the staged-rollout safety net input.
+
+## Out of scope respected
+Nothing under templates/, netbox/, scripts/, inventories/ touched.
+Remediation push explicitly not built (non-goal).

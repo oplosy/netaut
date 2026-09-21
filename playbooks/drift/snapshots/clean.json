@@ -1,0 +1,23 @@
+{
+  "devices": {
+    "lab-sw01": {
+      "vlans": [{"id": 99, "name": "MGMT"}],
+      "interfaces": [{"name": "GigabitEthernet0/0", "access_vlan": 99}],
+      "common": {
+        "ntp_servers": ["10.0.0.53"],
+        "dns_servers": ["10.0.0.53"],
+        "syslog_servers": ["10.0.0.54"]
+      }
+    },
+    "lab-sw02": {
+      "vlans": [{"id": 99, "name": "MGMT"}],
+      "interfaces": [{"name": "GigabitEthernet0/0", "access_vlan": 99}],
+      "common": {
+        "ntp_servers": ["10.0.0.53"],
+        "dns_servers": ["10.0.0.53"],
+        "syslog_servers": ["10.0.0.54"]
+      }
+    }
+  },
+  "provenance": "fixture mirroring netbox/intended/sample.yml (CI, no live devices yet)"
+}

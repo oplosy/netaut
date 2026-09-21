@@ -1,0 +1,19 @@
+---
+# Read-only drift detection wrapper (T-004). Runs fully on localhost against
+# local files; this role never pushes config (REQ-006). Drift (rc 2) is a
+# finding, not a failure: only rc 1 (tool error) fails the play.
+- name: Detect drift between operational snapshot and intended state
+  ansible.builtin.command:
+    cmd: >-
+      python3 {{ drift_tool }}
+      --intended {{ drift_intended }}
+      --operational {{ drift_operational }}
+      --report {{ drift_report }}
+  delegate_to: localhost
+  run_once: true
+  changed_when: false
+  check_mode: false
+  register: drift_result
+  failed_when: drift_result.rc not in [0, 2]
+  vars:
+    drift_tool: "{{ playbook_dir }}/../../roles/drift/files/drift.py"
