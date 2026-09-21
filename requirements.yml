@@ -1,0 +1,10 @@
+# Pinned collection dependencies (T-000).
+# Versions below are UNVERIFIED - not externally checked during init run.
+# T-001 entry criterion: confirm pins against galaxy before first lab deploy.
+collections:
+  - name: cisco.ios
+    version: ">=6.0.0"
+  - name: ansible.netcommon
+    version: ">=5.0.0"
+  - name: community.general
+    version: ">=8.0.0"

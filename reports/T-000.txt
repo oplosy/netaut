@@ -1,0 +1,32 @@
+COMPLETION REPORT — T-000 (scaffold repo, inventory skeleton, audit convention)
+Executor: ORCHESTRATOR (single-agent sequential run). Baseline: v1.
+
+## Files created (all inside owns, outside must_not_touch)
+- inventories/lab.yml (lab/ios: lab-sw01 10.0.0.11, lab-sw02 10.0.0.12)
+- ansible.cfg (inventory path, no retry files, diff_always, vault_password_file)
+- requirements.yml (cisco.ios / ansible.netcommon / community.general, UNVERIFIED pins)
+
+## Verification (orchestrator rerun)
+V1 ansible-inventory -i inventories/lab.yml --graph -> exit 0
+  @all -> @lab -> @ios -> lab-sw01, lab-sw02. A1 satisfied.
+  Note: WSL ansible-core 2.21.4 used (Windows has no control node).
+  Warning recorded: /mnt/c checkout is world-writable so ansible.cfg was
+  ignored for this run; real runs use a Linux checkout or ~/.ansible.cfg.
+  Follow-up noted for T-005 CI (Linux runner).
+V2 secret handling -> CLEAN (interim method, see deviation below)
+  Inline scan over 3 scaffold files: 0 hits (password/secret/key/AKIA/gh_p patterns).
+  Git log holds 1 commit (bbc4d4a), no secret material. A2 satisfied.
+
+## Deviation (minor, non-architectural)
+Spec V2 cmd points at scripts/secret_scan.py, which is owned by T-005 and does
+not exist yet. Reason: T-000 cannot create files under scripts/ without
+violating its owns boundary. Benefit: boundary preserved; scan still performed
+with equivalent inline patterns now, canonical script in T-005 re-scans the
+whole tree. Rollback cost: none (additive).
+
+## Invariants / risks
+INV-001 preserved: no secret values in files or history; vault_password_file
+points at .vault_pass which is gitignored and absent. RISK-002 addressed.
+
+## Out of scope respected
+No files under roles/, playbooks/, templates/, scripts/ touched.

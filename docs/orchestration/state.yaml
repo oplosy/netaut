@@ -2,8 +2,8 @@ baseline: v1
 max_attempts: 2
 last_updated_by: ORCHESTRATOR
 tasks:
-  T-000: {status: READY, validated_baseline: v1, attempts: 0, assigned_to: null}
-  T-001: {status: PLANNED, validated_baseline: v1, attempts: 0, assigned_to: null}
+  T-000: {status: DONE, validated_baseline: v1, attempts: 1, assigned_to: ORCHESTRATOR, verified_by: ORCHESTRATOR, verification_evidence: reports/T-000.txt}
+  T-001: {status: READY, validated_baseline: v1, attempts: 0, assigned_to: null}
   T-002: {status: PLANNED, validated_baseline: v1, attempts: 0, assigned_to: null}
   T-003: {status: PLANNED, validated_baseline: v1, attempts: 0, assigned_to: null}
   T-004: {status: PLANNED, validated_baseline: v1, attempts: 0, assigned_to: null}
