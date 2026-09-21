@@ -1,0 +1,38 @@
+id: T-006
+title: Bring up Containerlab lab with 2 IOSv nodes
+implements: []
+preserves: [INV-001]
+addresses: [OPS-001]
+baseline: v1
+depends_on: [T-005]
+owns:
+  - lab/
+must_not_touch:
+  - roles/
+  - playbooks/
+  - templates/
+  - scripts/
+shared_owner: false
+risk: MODERATE
+review_required: false
+objective: >
+  Deployable Containerlab topology (2 IOSv nodes, mgmt network) so later
+  waves run live against lab instead of fixtures. Image procurement stays an
+  owner action; this task wires everything around it.
+acceptance:
+  - id: A1
+    text: Topology deploys and both nodes report mgmt reachability.
+    verified_by: V1
+  - id: A2
+    text: Mgmt SSH uses Vault-provided credentials; no secret in lab files.
+    verified_by: V2
+verify:
+  - id: V1
+    cmd: containerlab deploy -t lab/containerlab.yml
+    expect: exit 0
+  - id: V2
+    cmd: python scripts/secret_scan.py --root lab
+    expect: exit 0
+out_of_scope:
+  - Image download licensing (owner procurement, ASM-002)
+  - Production devices (ASM-001 lab-only)

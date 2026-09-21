@@ -8,3 +8,4 @@ tasks:
   T-003: {status: DONE, validated_baseline: v1, attempts: 1, assigned_to: ORCHESTRATOR, verified_by: ORCHESTRATOR, verification_evidence: reports/T-003.txt, reviewed_by: REVIEW_AGENT, review_evidence: reports/reviews/T-003.md}
   T-004: {status: DONE, validated_baseline: v1, attempts: 1, assigned_to: ORCHESTRATOR, verified_by: ORCHESTRATOR, verification_evidence: reports/T-004.txt}
   T-005: {status: DONE, validated_baseline: v1, attempts: 1, assigned_to: ORCHESTRATOR, verified_by: ORCHESTRATOR, verification_evidence: reports/T-005.txt}
+  T-006: {status: PLANNED, validated_baseline: v1, attempts: 0, assigned_to: null}
