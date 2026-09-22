@@ -51,6 +51,11 @@ jobs:
           ansible-playbook playbooks/deploy/site.yml -i inventories/lab.yml --syntax-check
           ansible-playbook playbooks/drift/report.yml -i inventories/lab.yml --syntax-check
 
+      - name: EOS argspec proof (rendered state, no device)
+        env:
+          ANSIBLE_ROLES_PATH: roles
+        run: ansible-playbook playbooks/proof/rendered.yml -e netaut_proof_vendor=eos
+
       - name: Deploy dry run (render-only, no devices touched)
         env:
           ANSIBLE_ROLES_PATH: roles
