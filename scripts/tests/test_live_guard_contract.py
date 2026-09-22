@@ -12,11 +12,21 @@ def load(path):
     return yaml.safe_load(path.read_text(encoding="utf-8"))
 
 
+def guards(tasks):
+    return [t["ansible.builtin.assert"]["that"][0] for t in tasks[:2]]
+
+
 def test_entry_points_assert_vendor_and_wave_before_anything():
-    for entry in ("backup", "postcheck", "restore"):
-        first = load(TASKS / f"{entry}.yml")[0]["ansible.builtin.assert"]["that"]
-        assert "netaut_vendor in ['eos']" in first, entry
-        assert "netaut_wave | default('') | length > 0" in first, entry
+    for entry in ("backup", "postcheck"):
+        assert guards(load(TASKS / f"{entry}.yml")) == [
+            "netaut_vendor in ['eos']", "netaut_wave | default('') | length > 0"], entry
+
+
+def test_restore_guards_run_first_inside_the_backup_block():
+    block = next(t for t in load(TASKS / "restore.yml") if "block" in t)
+    assert block["when"] == "netaut_backup_file is defined"
+    assert guards(block["block"]) == [
+        "netaut_vendor in ['eos']", "netaut_wave | default('') | length > 0"]
 
 
 def test_ios_has_no_live_implementation_yet():
