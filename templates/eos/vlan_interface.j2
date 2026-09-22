@@ -1,0 +1,10 @@
+{% for vlan in netaut_vlans %}
+vlan {{ vlan.id }}
+   name {{ vlan.name }}
+{% endfor %}
+{% for iface in netaut_interfaces %}
+interface {{ iface.name }}
+   description {{ iface.description }}
+   switchport mode access
+   switchport access vlan {{ iface.access_vlan }}
+{% endfor %}

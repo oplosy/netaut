@@ -47,6 +47,9 @@ def main(argv: list[str] | None = None) -> int:
                                 "--input", "netbox/intended/lab-eos.yml"]),
         ("render-idempotency", [sys.executable, "scripts/render_idempotency.py",
                                 "--input", args.sample, "--vendor", "ios", "--repo", "."]),
+        ("render-idempotency-eos", [sys.executable, "scripts/render_idempotency.py",
+                                    "--input", "netbox/intended/lab-eos.yml",
+                                    "--vendor", "eos", "--repo", "."]),
         ("pytest", [sys.executable, "-m", "pytest", "roles", "scripts/tests", "-q"]),
     ]
     for name, cmd in gates:

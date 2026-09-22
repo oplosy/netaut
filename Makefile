@@ -22,6 +22,7 @@ validate:
 
 render:
 	python scripts/render_idempotency.py --input $(SAMPLE) --vendor ios --repo .
+	python scripts/render_idempotency.py --input netbox/intended/lab-eos.yml --vendor eos --repo .
 
 test:
 	python -m pytest roles scripts/tests -q
