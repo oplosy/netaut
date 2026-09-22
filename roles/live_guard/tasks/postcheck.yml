@@ -2,12 +2,17 @@
 # Live post-check (T-010): device running-config -> operational snapshot ->
 # drift against intended state. Only rc 0 passes; drift (2) or error (1)
 # fails the wave and triggers rollback.
-- name: Require supported vendor and wave id (fail closed)
+- name: Require a vendor with a live implementation (fail closed)
   ansible.builtin.assert:
     that:
       - netaut_vendor in ['eos']
+    fail_msg: "live_guard: no live implementation for vendor {{ netaut_vendor }}"
+
+- name: Require a wave id (fail closed)
+  ansible.builtin.assert:
+    that:
       - netaut_wave | default('') | length > 0
-    fail_msg: "live_guard: vendor {{ netaut_vendor }} has no live implementation or netaut_wave unset"
+    fail_msg: "live_guard: netaut_wave unset; pass -e netaut_wave=<wave record id>"
 
 - name: Fetch post-wave running-config
   ansible.builtin.include_tasks: "{{ netaut_vendor }}/fetch.yml"

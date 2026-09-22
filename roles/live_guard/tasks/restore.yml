@@ -1,13 +1,7 @@
 ---
 # Live restore (T-011, ADR-005). Runs only from the wave rescue. Without a
-# backup the wave failed before any change, so there is nothing to undo.
-- name: Require supported vendor and wave id (fail closed)
-  ansible.builtin.assert:
-    that:
-      - netaut_vendor in ['eos']
-      - netaut_wave | default('') | length > 0
-    fail_msg: "live_guard: vendor {{ netaut_vendor }} has no live implementation or netaut_wave unset"
-
+# backup the wave failed before any change, so there is nothing to undo and
+# the vendor/wave guards only apply once a backup exists.
 - name: Nothing to restore when the backup never happened
   ansible.builtin.debug:
     msg: "no backup for {{ inventory_hostname }}: wave failed before any change"
@@ -16,6 +10,18 @@
 - name: Restore and verify
   when: netaut_backup_file is defined
   block:
+    - name: Require a vendor with a live implementation (fail closed)
+      ansible.builtin.assert:
+        that:
+          - netaut_vendor in ['eos']
+        fail_msg: "live_guard: no live implementation for vendor {{ netaut_vendor }}"
+
+    - name: Require a wave id (fail closed)
+      ansible.builtin.assert:
+        that:
+          - netaut_wave | default('') | length > 0
+        fail_msg: "live_guard: netaut_wave unset; pass -e netaut_wave=<wave record id>"
+
     - name: Replace running-config with pre-wave backup
       ansible.builtin.include_tasks: "{{ netaut_vendor }}/restore.yml"
 

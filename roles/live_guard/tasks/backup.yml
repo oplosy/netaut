@@ -1,12 +1,17 @@
 ---
 # Pre-wave backup (T-011, ADR-005). Runs before any change; a missing or
 # empty backup stops the wave before the first config task.
-- name: Require supported vendor and wave id (fail closed)
+- name: Require a vendor with a live implementation (fail closed)
   ansible.builtin.assert:
     that:
       - netaut_vendor in ['eos']
+    fail_msg: "live_guard: no live implementation for vendor {{ netaut_vendor }}"
+
+- name: Require a wave id (fail closed)
+  ansible.builtin.assert:
+    that:
       - netaut_wave | default('') | length > 0
-    fail_msg: "live_guard: vendor {{ netaut_vendor }} has no live implementation or netaut_wave unset"
+    fail_msg: "live_guard: netaut_wave unset; pass -e netaut_wave=<wave record id>"
 
 - name: Ensure local backup and run directories
   ansible.builtin.file:
