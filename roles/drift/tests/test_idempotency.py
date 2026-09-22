@@ -72,3 +72,20 @@ def test_tool_opens_no_device_connections():
               "urllib", "ansible", "pyats", "pexpect", "ssh"]
     hits = [b for b in banned if b in source]
     assert not hits, f"network-capable imports in drift tool: {hits}"
+
+
+def test_device_filter_ignores_other_devices(tmp_path):
+    """--device compares one host only: the others do not count as missing."""
+    snap = tmp_path / "one.json"
+    snap.write_text(
+        '{"devices": {"lab-sw01": {"vlans": [{"id": 99, "name": "MGMT"}],'
+        ' "interfaces": [{"name": "GigabitEthernet0/0", "access_vlan": 99}],'
+        ' "common": {"ntp_servers": ["10.0.0.53"], "dns_servers": ["10.0.0.53"],'
+        ' "syslog_servers": ["10.0.0.54"]}}}}', encoding="utf-8")
+    res = run_tool(snap, tmp_path / "r.md", ("--device", "lab-sw01", "--fail-on-drift"))
+    assert res.returncode == 0, res.stderr
+
+
+def test_device_filter_unknown_device_is_error(tmp_path):
+    res = run_tool(SNAP_DIR / "clean.json", tmp_path / "r.md", ("--device", "nope"))
+    assert res.returncode == 1
