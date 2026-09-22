@@ -25,6 +25,9 @@
       ansible.builtin.set_fact:
         netaut_all: "{{ lookup('ansible.builtin.file', netaut_intended) | from_yaml }}"
       delegate_to: localhost
+      # Without delegate_facts the fact lands on the inventory hosts and
+      # hostvars.localhost.netaut_all is undefined in every live role.
+      delegate_facts: true
       run_once: true
 
     - name: Conflict gate (aborts before any device connection)
