@@ -89,6 +89,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--operational", required=True)
     parser.add_argument("--report", required=True)
     parser.add_argument("--fail-on-drift", action="store_true")
+    parser.add_argument("--device", help="compare only this device (live per-host post-check)")
     args = parser.parse_args(argv)
     try:
         intended = load_yaml(args.intended)
@@ -99,6 +100,13 @@ def main(argv: list[str] | None = None) -> int:
 
     intended_by_name = {d["name"]: d for d in intended.get("devices", [])}
     global_vlans = {int(v["id"]): v.get("name") for v in intended.get("vlans", [])}
+    if args.device:
+        if args.device not in intended_by_name:
+            print(f"drift ERROR: unknown device {args.device!r} in intended state", file=sys.stderr)
+            return 1
+        intended_by_name = {args.device: intended_by_name[args.device]}
+        operational["devices"] = {
+            k: v for k, v in operational.get("devices", {}).items() if k == args.device}
     drifts: list[str] = []
     for name, op in operational.get("devices", {}).items():
         if name not in intended_by_name:
