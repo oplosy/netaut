@@ -9,3 +9,7 @@ tasks:
   T-004: {status: DONE, validated_baseline: v1, attempts: 1, assigned_to: ORCHESTRATOR, verified_by: ORCHESTRATOR, verification_evidence: reports/T-004.txt}
   T-005: {status: DONE, validated_baseline: v1, attempts: 1, assigned_to: ORCHESTRATOR, verified_by: ORCHESTRATOR, verification_evidence: reports/T-005.txt}
   T-007: {status: DONE, validated_baseline: v1, attempts: 1, assigned_to: ORCHESTRATOR, verified_by: ORCHESTRATOR, verification_evidence: reports/T-007.txt}
+  T-008: {status: DONE, validated_baseline: v1, attempts: 1, assigned_to: ORCHESTRATOR, verified_by: ORCHESTRATOR, verification_evidence: reports/T-008.txt}
+  T-009: {status: BLOCKED, validated_baseline: v1, attempts: 0, assigned_to: ORCHESTRATOR, blocked_on: OWNER cEOS image import}
+  T-010: {status: BLOCKED, validated_baseline: v1, attempts: 0, assigned_to: ORCHESTRATOR, blocked_on: T-009}
+  T-011: {status: BLOCKED, validated_baseline: v1, attempts: 0, assigned_to: ORCHESTRATOR, blocked_on: T-009, review_evidence: reports/reviews/T-011.md}

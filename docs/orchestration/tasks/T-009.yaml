@@ -1,0 +1,32 @@
+id: T-009
+title: Containerlab cEOS lab bring-up
+implements: [REQ-009]
+preserves: [INV-001]
+addresses: [OPS-001]
+baseline: v1
+depends_on: [T-008]
+owns:
+  - lab/
+  - inventories/lab-eos.yml
+  - scripts/lab_vault.sh
+  - Makefile
+must_not_touch:
+  - roles/
+  - templates/
+shared_owner: false
+risk: LOW
+review_required: false
+objective: >
+  Two cEOS nodes reachable over network_cli with a vault-held login, brought
+  up and torn down by make targets from WSL.
+acceptance:
+  - id: A1
+    text: make lab-up yields two running nodes reachable on 172.20.20.11/.12.
+    verified_by: V1
+verify:
+  - id: V1
+    cmd: make lab-up && sudo containerlab inspect -t lab/netaut.clab.yml
+    expect: two nodes running
+blocked_on: OWNER imports the cEOS-lab image (free Arista account download)
+out_of_scope:
+  - Running the lab in CI (image not redistributable)

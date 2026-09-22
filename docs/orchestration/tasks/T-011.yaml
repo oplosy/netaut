@@ -1,0 +1,36 @@
+id: T-011
+title: Pre-wave backup and verified restore
+implements: [REQ-004, REQ-009]
+preserves: [INV-001, INV-004]
+addresses: [RISK-001, RISK-002, OPS-001]
+baseline: v1
+depends_on: [T-010]
+owns:
+  - roles/live_guard/
+  - playbooks/deploy/rollback.yml
+must_not_touch:
+  - templates/
+  - netbox/
+shared_owner: false
+risk: HIGH
+review_required: true
+objective: >
+  Before any change each host's running-config is backed up outside the repo;
+  a failed wave replaces the config with the backup and proves equality.
+acceptance:
+  - id: A1
+    text: Forced post-check failure on a pristine lab restores every host and logs restore verified.
+    verified_by: V1
+  - id: A2
+    text: Unsupported vendor or unset wave id fails before any device change.
+    verified_by: V2
+verify:
+  - id: V1
+    cmd: make lab-verify
+    expect: drill PASS
+  - id: V2
+    cmd: pytest scripts/tests/test_live_guard_contract.py -q
+    expect: exit 0
+blocked_on: T-009
+out_of_scope:
+  - IOS live restore (fails closed until a live IOS lab exists)

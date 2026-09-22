@@ -49,6 +49,11 @@ requirements:
     level: MUST
     status: ACTIVE
     source: owner phase plan (phase 3 active per ACR-004; OSPF/BGP excluded)
+  REQ-009:
+    text: Live waves on a free cEOS lab take a pre-wave backup, pass a device-state post-check and restore verifiably on failure.
+    level: MUST
+    status: ACTIVE
+    source: owner decision in chat 2026-09-22 (ACR-005)
 
 invariants:
   INV-001:

@@ -1,0 +1,34 @@
+id: T-010
+title: Live wave with device-state post-check
+implements: [REQ-004, REQ-009]
+preserves: [INV-002, INV-004]
+addresses: [RISK-001, OPS-001]
+baseline: v1
+depends_on: [T-009]
+owns:
+  - playbooks/deploy/site.yml
+  - roles/live_guard/files/
+  - roles/drift/files/drift.py
+  - scripts/lab_verify.py
+must_not_touch:
+  - templates/
+shared_owner: false
+risk: HIGH
+review_required: true
+objective: >
+  A live wave applies intended state, the post-check compares the device's
+  running-config with intended state via the drift tool, and a rerun changes nothing.
+acceptance:
+  - id: A1
+    text: Live wave exits 0 with drift rc 0 per host.
+    verified_by: V1
+  - id: A2
+    text: Rerun reports changed=0 on every lab host.
+    verified_by: V1
+verify:
+  - id: V1
+    cmd: make lab-verify
+    expect: deploy PASS, rerun PASS
+blocked_on: T-009
+out_of_scope:
+  - Routing in live waves (render-only; recorded gap in ACR-005)

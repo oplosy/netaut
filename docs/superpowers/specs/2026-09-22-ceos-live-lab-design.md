@@ -55,8 +55,11 @@ Success means all of the following on a local cEOS lab, with evidence in `report
 - The play targets the `lab` group instead of `ios`.
 - **Pre-wave backup (ADR-005, now accepted).** In live mode, before any
   change, the play saves each host's `running-config` to
-  `reports/backups/<host>-<wave>.cfg`. That path is gitignored. Logs mask
-  credentials (`no_log` on tasks that carry them).
+  `~/.netaut/backups/<host>-<wave>.cfg`. (Amended during planning: a
+  running-config carries hashed user secrets, so it never lives in the repo
+  tree. The original draft said `reports/backups/`.) Backup, post-check and
+  restore live in a `live_guard` role that dispatches per vendor and fails
+  closed for vendors without a live implementation.
 - **Real post-check.** In live mode the play gathers facts, writes an
   operational snapshot in the `playbooks/drift/operational-schema.yml`
   shape, and runs the existing drift tool against the intended state.
@@ -100,7 +103,7 @@ recorded as a known gap and not done silently.
 - Tasks:
   - **T-008:** vendor dispatch in roles plus EOS render. Device-less, CI only.
   - **T-009:** lab bring-up (containerlab, inventory, Make targets).
-    Blocked on the OWNER providing the image and a working Docker Desktop.
+    Blocked on the OWNER providing the image.
   - **T-010:** live wave plus real post-check.
   - **T-011:** backup and restore. HIGH risk, needs `reports/reviews/T-011.md`.
 
@@ -109,4 +112,5 @@ OSPF/BGP, live IOS, running the lab in CI, and routing in the live wave (see abo
 
 ## OWNER prerequisites
 1. Create a free arista.com account and download `cEOS64-lab-<version>.tar.xz`.
-2. Fix Docker Desktop (it currently fails to start). WSL Ubuntu already works.
+2. ~~Fix Docker Desktop~~. Not needed: Docker 29.6 and containerlab already run
+   natively in WSL Ubuntu (found during implementation).
