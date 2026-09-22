@@ -5,6 +5,7 @@
 # Ansible runtime
 *.retry
 *.log
+collections/
 # Python
 __pycache__/
 *.pyc

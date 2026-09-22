@@ -7,3 +7,6 @@ rules:
   truthy:
     allowed-values: ["true", "false", "on"]
     check-keys: false
+# Galaxy collections install into ./collections (ansible.cfg); third-party.
+ignore: |
+  collections/
