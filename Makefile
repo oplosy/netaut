@@ -3,10 +3,11 @@
 SAMPLE ?= netbox/intended/sample.yml
 INVENTORY ?= inventories/lab.yml
 
-.PHONY: gates lint scan validate render test preview-deploy preview-drift help
+.PHONY: gates lint scan validate render test preview-deploy preview-drift help \n	lab-up lab-down lab-vault lab-verify
 
 help:
 	@echo "gates | lint | scan | validate | render | test | preview-deploy | preview-drift"
+	@echo "lab (run inside WSL): lab-up | lab-vault | lab-verify | lab-down"
 
 gates: lint scan validate render test
 
@@ -32,3 +33,23 @@ preview-deploy:
 
 preview-drift:
 	ansible-playbook playbooks/drift/report.yml -i $(INVENTORY) --check
+
+# Live lab (T-009..T-011, ADR-006). Run inside WSL with the cEOS image
+# imported locally (docker import cEOS64-lab-<ver>.tar.xz ceos:<ver>).
+# Vault material stays under ~/.netaut, outside the repo (INV-001).
+CEOS_IMAGE ?= ceos:latest
+LAB_VAULT ?= $(HOME)/.netaut/lab-vault.yml
+LAB_VAULT_PASS ?= $(HOME)/.netaut/vault_pass
+WAVE ?= W-$(shell date +%Y%m%d-%H%M%S)
+
+lab-up:
+	CEOS_IMAGE=$(CEOS_IMAGE) sudo -E containerlab deploy -t lab/netaut.clab.yml --reconfigure
+
+lab-down:
+	sudo containerlab destroy -t lab/netaut.clab.yml --cleanup
+
+lab-vault:
+	scripts/lab_vault.sh $(LAB_VAULT) $(LAB_VAULT_PASS)
+
+lab-verify:
+	python3 scripts/lab_verify.py --inventory inventories/lab-eos.yml --wave $(WAVE) 	  --vault-args "-e @$(LAB_VAULT) --vault-password-file $(LAB_VAULT_PASS)"

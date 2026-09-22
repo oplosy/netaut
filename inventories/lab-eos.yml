@@ -1,0 +1,20 @@
+# cEOS lab inventory (T-009, ADR-006). Connection details only; the login
+# comes from the encrypted ~/.netaut/lab-vault.yml at runtime (INV-001).
+all:
+  children:
+    lab:
+      children:
+        eos:
+          hosts:
+            lab-sw01:
+              ansible_host: 172.20.20.11
+            lab-sw02:
+              ansible_host: 172.20.20.12
+          vars:
+            ansible_network_os: arista.eos.eos
+            ansible_connection: ansible.netcommon.network_cli
+            ansible_become: true
+            ansible_become_method: enable
+            netaut_intended_file: "{{ inventory_dir }}/../netbox/intended/lab-eos.yml"
+      vars:
+        ansible_user: "{{ vault_lab_user | default('admin') }}"

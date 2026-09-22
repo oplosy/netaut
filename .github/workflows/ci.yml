@@ -50,6 +50,7 @@ jobs:
           ansible-playbook roles/common/tests/test.yml -i inventories/lab.yml --syntax-check
           ansible-playbook playbooks/deploy/site.yml -i inventories/lab.yml --syntax-check
           ansible-playbook playbooks/drift/report.yml -i inventories/lab.yml --syntax-check
+          ansible-playbook playbooks/deploy/site.yml -i inventories/lab-eos.yml --syntax-check
 
       - name: EOS argspec proof (rendered state, no device)
         env:
@@ -60,6 +61,11 @@ jobs:
         env:
           ANSIBLE_ROLES_PATH: roles
         run: ansible-playbook playbooks/deploy/site.yml -i inventories/lab.yml --check --diff
+
+      - name: EOS deploy dry run (render-only, no devices touched)
+        env:
+          ANSIBLE_ROLES_PATH: roles
+        run: ansible-playbook playbooks/deploy/site.yml -i inventories/lab-eos.yml --check --diff
 
       - name: Drift dry run (read-only)
         env:

@@ -12,5 +12,6 @@ __pycache__/
 .venv/
 # Lab / local state
 .containerlab/
+clab-*/
 reports/drift-*.md
 !reports/.gitkeep
