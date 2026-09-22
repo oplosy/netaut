@@ -1,0 +1,15 @@
+---
+# EOS running-config fetch (T-010). Input: live_guard_fetch_to (local path).
+- name: Read running-config
+  arista.eos.eos_command:
+    commands:
+      - show running-config
+  register: live_guard_running
+
+- name: Store fetched running-config locally
+  ansible.builtin.copy:
+    content: "{{ live_guard_running.stdout[0] }}\n"
+    dest: "{{ live_guard_fetch_to }}"
+    mode: "0600"
+  delegate_to: localhost
+  changed_when: false

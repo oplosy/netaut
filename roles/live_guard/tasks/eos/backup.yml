@@ -1,0 +1,9 @@
+---
+# EOS pre-wave backup (T-011). Reads only; the device is not changed.
+- name: Save running-config
+  arista.eos.eos_config:
+    backup: true
+    backup_options:
+      dir_path: "{{ netaut_backup_dir }}"
+      filename: "{{ inventory_hostname }}-{{ netaut_wave }}.cfg"
+  changed_when: false

@@ -1,0 +1,44 @@
+---
+# Live post-check (T-010): device running-config -> operational snapshot ->
+# drift against intended state. Only rc 0 passes; drift (2) or error (1)
+# fails the wave and triggers rollback.
+- name: Require supported vendor and wave id (fail closed)
+  ansible.builtin.assert:
+    that:
+      - netaut_vendor in ['eos']
+      - netaut_wave | default('') | length > 0
+    fail_msg: "live_guard: vendor {{ netaut_vendor }} has no live implementation or netaut_wave unset"
+
+- name: Fetch post-wave running-config
+  ansible.builtin.include_tasks: "{{ netaut_vendor }}/fetch.yml"
+  vars:
+    live_guard_fetch_to: "{{ netaut_run_dir }}/{{ inventory_hostname }}-post.cfg"
+
+- name: Build operational snapshot from running-config
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ live_guard_files }}/{{ netaut_vendor }}_snapshot.py"
+      - --config
+      - "{{ inventory_hostname }}={{ netaut_run_dir }}/{{ inventory_hostname }}-post.cfg"
+      - --out
+      - "{{ netaut_run_dir }}/{{ inventory_hostname }}-post.json"
+  delegate_to: localhost
+  changed_when: false
+
+- name: Post-check is drift against intended (rc 0 only)
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ live_guard_drift }}"
+      - --intended
+      - "{{ netaut_intended }}"
+      - --operational
+      - "{{ netaut_run_dir }}/{{ inventory_hostname }}-post.json"
+      - --report
+      - "{{ netaut_run_dir }}/{{ inventory_hostname }}-drift.md"
+      - --device
+      - "{{ inventory_hostname }}"
+      - --fail-on-drift
+  delegate_to: localhost
+  changed_when: false
