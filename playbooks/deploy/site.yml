@@ -4,14 +4,20 @@
 # any device task, so a conflict aborts with zero SSH opened (REQ-003).
 # The configuration wave is block/rescue/always: post-check failure stops the
 # wave and runs rollback.yml, then records FAILED (REQ-004, OPS-001).
+# Live waves (T-010/T-011) add live_guard: pre-wave backup first, real
+# drift-based post-check last, verified restore in rescue.
 - name: NetAut gated deploy
-  hosts: ios
+  hosts: lab
   gather_facts: false
   vars:
-    netaut_intended: "{{ playbook_dir }}/../../netbox/intended/sample.yml"
+    # Inventory may point at its own intended file (lab-eos.yml sets it).
+    netaut_intended: "{{ netaut_intended_file | default(playbook_dir ~ '/../../netbox/intended/sample.yml') }}"
     # render-only: gates + preview run device-less (CI, --check).
     # live: roles push to devices. Flip per wave in the wave record, never here.
     netaut_mode: render-only
+    # Wave id from the wave record (-e netaut_wave=W-...). Live waves fail
+    # closed without it: it names the backup that rollback restores.
+    netaut_wave: ""
     # Drill switch for the stop/rollback wiring proof (reports/T-003.txt).
     netaut_force_postcheck_fail: false
   pre_tasks:
@@ -27,6 +33,12 @@
   tasks:
     - name: Configuration wave
       block:
+        - name: Pre-wave backup (live only, fail closed)
+          ansible.builtin.include_role:
+            name: live_guard
+            tasks_from: backup
+          when: netaut_mode == 'live'
+
         - name: Apply common settings
           ansible.builtin.include_role:
             name: common
@@ -42,7 +54,13 @@
             netaut_interfaces: "{{ (hostvars.localhost.netaut_all.devices | selectattr('name', 'equalto', inventory_hostname) | first).interfaces }}"
           when: netaut_mode == 'live'
 
-        - name: Post-check wave result matches intended
+        - name: Post-check device state matches intended (live only)
+          ansible.builtin.include_role:
+            name: live_guard
+            tasks_from: postcheck
+          when: netaut_mode == 'live'
+
+        - name: Post-check drill switch
           ansible.builtin.assert:
             that:
               - not netaut_force_postcheck_fail

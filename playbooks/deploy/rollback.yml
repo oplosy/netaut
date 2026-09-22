@@ -1,10 +1,10 @@
 ---
-# Wave rollback (T-003, OPS-001). Runs inside site.yml rescue, so it executes
-# only after the wave already failed: never on a healthy run.
-# Phase 1 (render-only / drill): writes a per-host marker under /tmp proving
-# the rescue path ran. Live waves restore the pre-wave backup (T-004 drift
-# keeps populating netaut_backup_dir; until then live rollback fails closed
-# rather than pretending).
+# Wave rollback (T-003, OPS-001; live restore T-011, ADR-005). Runs inside
+# site.yml rescue, so it executes only after the wave already failed: never
+# on a healthy run.
+# Render-only / drill: writes a per-host marker under /tmp proving the rescue
+# path ran. Live: live_guard restores the pre-wave backup and verifies the
+# device equals it. Vendors without a live implementation fail closed there.
 - name: Rollback marker for drill and audit trail
   ansible.builtin.copy:
     content: "rollback executed for {{ inventory_hostname }}\n"
@@ -12,8 +12,8 @@
     mode: "0644"
   delegate_to: localhost
 
-- name: Live restore is not yet implemented (fail closed, no fake success)
-  ansible.builtin.assert:
-    that:
-      - netaut_mode != 'live'
-    fail_msg: "live rollback restore lands with T-004 backup integration"
+- name: Restore pre-wave backup (live only)
+  ansible.builtin.include_role:
+    name: live_guard
+    tasks_from: restore
+  when: netaut_mode == 'live'
