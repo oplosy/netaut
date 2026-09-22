@@ -54,3 +54,19 @@ def test_restore_is_guarded_by_backup_presence():
 def test_postcheck_fails_on_any_drift():
     text = (TASKS / "postcheck.yml").read_text(encoding="utf-8")
     assert "--fail-on-drift" in text and "--device" in text
+
+
+def test_backup_refuses_a_reused_wave_id():
+    """A retry under the same wave id must not overwrite the pristine backup."""
+    tasks = load(TASKS / "backup.yml")
+    names = [t["name"] for t in tasks]
+    refuse = names.index("Refuse to overwrite an existing backup (fail closed)")
+    assert refuse < names.index("Take pre-wave backup")
+    assert "not live_guard_backup_prior.stat.exists" in tasks[refuse]["ansible.builtin.assert"]["that"]
+
+
+def test_restore_source_is_wrapped_in_raw():
+    """eos_config templates src: the backup must not be rendered as Jinja."""
+    text = (TASKS / "eos" / "restore.yml").read_text(encoding="utf-8")
+    assert "{% raw %}" in text and "{% endraw %}" in text
+    assert "src: \"{{ live_guard_restore_src }}\"" in text

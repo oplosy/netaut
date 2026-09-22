@@ -1,7 +1,26 @@
 ---
 # EOS restore (T-011): whole-config replace through a config session, so the
 # device lands exactly on the backup, not a merge of backup and wave.
+# eos_config renders src as a trusted Jinja template (ansible.netcommon), so
+# the backup is wrapped in a raw block: braces in banners or descriptions
+# must reach the device verbatim.
+- name: Backup must not contain a raw terminator (fail closed)
+  ansible.builtin.assert:
+    that:
+      - "'endraw' not in lookup('ansible.builtin.file', netaut_backup_file)"
+    fail_msg: "backup {{ netaut_backup_file }} cannot be passed through eos_config src safely"
+
+- name: Write raw-wrapped restore source
+  ansible.builtin.copy:
+    content: "{{ '{% raw %}' }}{{ lookup('ansible.builtin.file', netaut_backup_file) }}
+{{ '{% endraw %}' }}
+"
+    dest: "{{ live_guard_restore_src }}"
+    mode: "0600"
+  delegate_to: localhost
+  changed_when: false
+
 - name: Replace running-config with backup
   arista.eos.eos_config:
-    src: "{{ netaut_backup_file }}"
+    src: "{{ live_guard_restore_src }}"
     replace: config

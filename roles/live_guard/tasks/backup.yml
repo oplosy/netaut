@@ -24,6 +24,20 @@
   delegate_to: localhost
   changed_when: false
 
+- name: Stat any existing backup for this wave
+  ansible.builtin.stat:
+    path: "{{ netaut_backup_dir }}/{{ inventory_hostname }}-{{ netaut_wave }}.cfg"
+  delegate_to: localhost
+  register: live_guard_backup_prior
+
+# A retried wave under the same id would overwrite the pristine backup with
+# a half-changed config, and a later restore would land on that.
+- name: Refuse to overwrite an existing backup (fail closed)
+  ansible.builtin.assert:
+    that:
+      - not live_guard_backup_prior.stat.exists
+    fail_msg: "backup for wave {{ netaut_wave }} already exists on {{ inventory_hostname }}; use a new wave id"
+
 - name: Take pre-wave backup
   ansible.builtin.include_tasks: "{{ netaut_vendor }}/backup.yml"
 
