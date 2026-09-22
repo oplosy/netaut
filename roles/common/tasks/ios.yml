@@ -8,11 +8,12 @@
     state: "{{ netaut_module_state }}"
   loop: "{{ netaut_common.ntp_servers }}"
 
+# ios_system is a legacy module (no config key, no rendered state): the
+# device-less proof skips it; waves (merged) always apply it.
 - name: Configure DNS name servers
   cisco.ios.ios_system:
-    config:
-      name_servers: "{{ netaut_common.dns_servers }}"
-    state: "{{ netaut_module_state }}"
+    name_servers: "{{ netaut_common.dns_servers }}"
+  when: netaut_module_state == 'merged'
 
 - name: Configure syslog hosts
   cisco.ios.ios_logging_global:
