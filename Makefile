@@ -18,12 +18,13 @@ scan:
 
 validate:
 	python scripts/validate_model.py --schema netbox/schema.yml --input $(SAMPLE)
+	python scripts/validate_model.py --schema netbox/schema.yml --input netbox/intended/lab-eos.yml
 
 render:
 	python scripts/render_idempotency.py --input $(SAMPLE) --vendor ios --repo .
 
 test:
-	python -m pytest roles -q
+	python -m pytest roles scripts/tests -q
 
 preview-deploy:
 	ansible-playbook playbooks/deploy/site.yml -i $(INVENTORY) --check --diff

@@ -42,9 +42,12 @@ def main(argv: list[str] | None = None) -> int:
         ("secret-scan", [sys.executable, "scripts/secret_scan.py", "--root", "."]),
         ("validate-model", [sys.executable, "scripts/validate_model.py",
                             "--schema", "netbox/schema.yml", "--input", args.sample]),
+        ("validate-model-eos", [sys.executable, "scripts/validate_model.py",
+                                "--schema", "netbox/schema.yml",
+                                "--input", "netbox/intended/lab-eos.yml"]),
         ("render-idempotency", [sys.executable, "scripts/render_idempotency.py",
                                 "--input", args.sample, "--vendor", "ios", "--repo", "."]),
-        ("pytest", [sys.executable, "-m", "pytest", "roles", "-q"]),
+        ("pytest", [sys.executable, "-m", "pytest", "roles", "scripts/tests", "-q"]),
     ]
     for name, cmd in gates:
         if run(cmd, root) != 0:
