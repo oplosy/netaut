@@ -12,6 +12,7 @@
   cisco.ios.ios_l2_interfaces:
     config:
       - name: "{{ item.name }}"
+        mode: access
         access:
           vlan: "{{ item.access_vlan }}"
     state: "{{ netaut_module_state }}"

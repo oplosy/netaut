@@ -30,3 +30,13 @@ def test_vendor_files_only_use_their_collection():
             text = (REPO / "roles" / role / "tasks" / f"{vendor}.yml").read_text(encoding="utf-8")
             assert other not in text, (role, vendor)
             assert "netaut_module_state" in text, (role, vendor)
+
+
+def test_access_ports_force_access_mode_like_the_templates():
+    """Role and template must converge: both templates render switchport mode access."""
+    for vendor in VENDORS:
+        tasks = yaml.safe_load((REPO / "roles" / "vlan_interface" / "tasks" / f"{vendor}.yml")
+                               .read_text(encoding="utf-8"))
+        l2 = next(t for t in tasks if t["name"] == "Ensure access interfaces")
+        module = next(v for k, v in l2.items() if k.endswith("_l2_interfaces"))
+        assert module["config"][0]["mode"] == "access", vendor
