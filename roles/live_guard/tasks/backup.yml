@@ -1,0 +1,40 @@
+---
+# Pre-wave backup (T-011, ADR-005). Runs before any change; a missing or
+# empty backup stops the wave before the first config task.
+- name: Require supported vendor and wave id (fail closed)
+  ansible.builtin.assert:
+    that:
+      - netaut_vendor in ['eos']
+      - netaut_wave | default('') | length > 0
+    fail_msg: "live_guard: vendor {{ netaut_vendor }} has no live implementation or netaut_wave unset"
+
+- name: Ensure local backup and run directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0700"
+  loop:
+    - "{{ netaut_backup_dir }}"
+    - "{{ netaut_run_dir }}"
+  delegate_to: localhost
+  changed_when: false
+
+- name: Take pre-wave backup
+  ansible.builtin.include_tasks: "{{ netaut_vendor }}/backup.yml"
+
+- name: Stat pre-wave backup
+  ansible.builtin.stat:
+    path: "{{ netaut_backup_dir }}/{{ inventory_hostname }}-{{ netaut_wave }}.cfg"
+  delegate_to: localhost
+  register: live_guard_backup_stat
+
+- name: Backup must exist and be non-empty (fail closed)
+  ansible.builtin.assert:
+    that:
+      - live_guard_backup_stat.stat.exists
+      - live_guard_backup_stat.stat.size > 0
+    fail_msg: "pre-wave backup missing for {{ inventory_hostname }}; wave not started"
+
+- name: Record backup path for restore
+  ansible.builtin.set_fact:
+    netaut_backup_file: "{{ live_guard_backup_stat.stat.path }}"

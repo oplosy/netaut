@@ -1,0 +1,7 @@
+---
+# EOS restore (T-011): whole-config replace through a config session, so the
+# device lands exactly on the backup, not a merge of backup and wave.
+- name: Replace running-config with backup
+  arista.eos.eos_config:
+    src: "{{ netaut_backup_file }}"
+    replace: config

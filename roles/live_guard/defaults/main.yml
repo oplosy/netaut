@@ -1,0 +1,9 @@
+---
+# Live-wave guard defaults (T-010/T-011). Backups and fetched configs hold the
+# device's hashed user secrets, so they live outside the repo (INV-001).
+netaut_wave: ""
+netaut_backup_dir: "{{ lookup('env','HOME') }}/.netaut/backups"
+netaut_run_dir: "{{ lookup('env','HOME') }}/.netaut/runs/{{ netaut_wave }}"
+netaut_vendor: "{{ ansible_network_os | default('') | split('.') | last }}"
+live_guard_files: "{{ role_path }}/files"
+live_guard_drift: "{{ role_path }}/../drift/files/drift.py"

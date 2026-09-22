@@ -1,0 +1,40 @@
+---
+# Live restore (T-011, ADR-005). Runs only from the wave rescue. Without a
+# backup the wave failed before any change, so there is nothing to undo.
+- name: Require supported vendor and wave id (fail closed)
+  ansible.builtin.assert:
+    that:
+      - netaut_vendor in ['eos']
+      - netaut_wave | default('') | length > 0
+    fail_msg: "live_guard: vendor {{ netaut_vendor }} has no live implementation or netaut_wave unset"
+
+- name: Nothing to restore when the backup never happened
+  ansible.builtin.debug:
+    msg: "no backup for {{ inventory_hostname }}: wave failed before any change"
+  when: netaut_backup_file is not defined
+
+- name: Restore and verify
+  when: netaut_backup_file is defined
+  block:
+    - name: Replace running-config with pre-wave backup
+      ansible.builtin.include_tasks: "{{ netaut_vendor }}/restore.yml"
+
+    - name: Fetch restored running-config
+      ansible.builtin.include_tasks: "{{ netaut_vendor }}/fetch.yml"
+      vars:
+        live_guard_fetch_to: "{{ netaut_run_dir }}/{{ inventory_hostname }}-restored.cfg"
+
+    - name: Restored state must equal backup
+      ansible.builtin.command:
+        argv:
+          - python3
+          - "{{ live_guard_files }}/{{ netaut_vendor }}_snapshot.py"
+          - --compare
+          - "{{ netaut_backup_file }}"
+          - "{{ netaut_run_dir }}/{{ inventory_hostname }}-restored.cfg"
+      delegate_to: localhost
+      changed_when: false
+
+    - name: Restore verified marker
+      ansible.builtin.debug:
+        msg: "restore verified for {{ inventory_hostname }} from {{ netaut_backup_file }}"
