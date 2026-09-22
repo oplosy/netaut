@@ -4,3 +4,7 @@
 netaut_static_routes: null
 netaut_prefix_lists: null
 netaut_route_maps: null
+# Vendor dispatch (T-008): ios | eos, from ansible_network_os.
+netaut_vendor: "{{ ansible_network_os | default('') | split('.') | last }}"
+# merged for waves; the device-less proof sets rendered.
+netaut_module_state: merged

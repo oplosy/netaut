@@ -1,0 +1,18 @@
+---
+# IOS module calls for VLANs and access ports (T-002, T-008 split). Module arguments only (INV-003).
+- name: Ensure VLANs exist
+  cisco.ios.ios_vlans:
+    config:
+      - vlan_id: "{{ item.id }}"
+        name: "{{ item.name }}"
+    state: "{{ netaut_module_state }}"
+  loop: "{{ netaut_vlans }}"
+
+- name: Ensure access interfaces
+  cisco.ios.ios_l2_interfaces:
+    config:
+      - name: "{{ item.name }}"
+        access:
+          vlan: "{{ item.access_vlan }}"
+    state: "{{ netaut_module_state }}"
+  loop: "{{ netaut_interfaces }}"

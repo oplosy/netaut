@@ -1,0 +1,19 @@
+---
+# EOS module calls for VLANs and access ports (T-008). Module arguments only (INV-003).
+- name: Ensure VLANs exist
+  arista.eos.eos_vlans:
+    config:
+      - vlan_id: "{{ item.id }}"
+        name: "{{ item.name }}"
+    state: "{{ netaut_module_state }}"
+  loop: "{{ netaut_vlans }}"
+
+- name: Ensure access interfaces
+  arista.eos.eos_l2_interfaces:
+    config:
+      - name: "{{ item.name }}"
+        mode: access
+        access:
+          vlan: "{{ item.access_vlan }}"
+    state: "{{ netaut_module_state }}"
+  loop: "{{ netaut_interfaces }}"
