@@ -25,7 +25,7 @@ acceptance:
     verified_by: V1
 verify:
   - id: V1
-    cmd: make lab-up && sudo containerlab inspect -t lab/netaut.clab.yml
+    cmd: make lab-up && containerlab inspect -t lab/netaut.clab.yml
     expect: two nodes running
 blocked_on: OWNER imports the cEOS-lab image (free Arista account download)
 out_of_scope:

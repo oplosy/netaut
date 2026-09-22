@@ -37,16 +37,17 @@ preview-drift:
 # Live lab (T-009..T-011, ADR-006). Run inside WSL with the cEOS image
 # imported locally (docker import cEOS64-lab-<ver>.tar.xz ceos:<ver>).
 # Vault material stays under ~/.netaut, outside the repo (INV-001).
+# No sudo: members of the clab_admins group run containerlab directly.
 CEOS_IMAGE ?= ceos:latest
 LAB_VAULT ?= $(HOME)/.netaut/lab-vault.yml
 LAB_VAULT_PASS ?= $(HOME)/.netaut/vault_pass
 WAVE ?= W-$(shell date +%Y%m%d-%H%M%S)
 
 lab-up:
-	CEOS_IMAGE=$(CEOS_IMAGE) sudo -E containerlab deploy -t lab/netaut.clab.yml --reconfigure
+	CEOS_IMAGE=$(CEOS_IMAGE) containerlab deploy -t lab/netaut.clab.yml --reconfigure
 
 lab-down:
-	sudo containerlab destroy -t lab/netaut.clab.yml --cleanup
+	containerlab destroy -t lab/netaut.clab.yml --cleanup
 
 lab-vault:
 	scripts/lab_vault.sh $(LAB_VAULT) $(LAB_VAULT_PASS)
