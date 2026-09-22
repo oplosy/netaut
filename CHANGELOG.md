@@ -6,7 +6,9 @@ Generated from commit history (`git log --oneline`).
 
 - T-008: EOS render twins, per-role vendor dispatch, all-template render proof, device-less argspec proof in CI
 - T-009..T-011: containerlab cEOS topology, eos inventory, `live_guard` (backup, drift post-check, verified restore), `make lab-*`; live evidence pending image
-- Fixes: ios static-route render line join, ios_system argspec, CI yamllint on installed collections
+- Fixes: ios static-route render line join, ios_system argspec, CI yamllint on installed collections,
+  intended-state fact never reaching localhost (live waves), ios access mode
+- Review: reports/reviews/T-011.md (7 findings, all fixed)
 - Decisions: ACR-005, ADR-006, ADR-005 accepted
 
 ## v1.0.0 (2026-09-22)
