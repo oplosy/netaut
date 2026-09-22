@@ -1,0 +1,45 @@
+id: T-008
+title: EOS vendor render and per-role vendor dispatch
+implements: [REQ-009]
+preserves: [INV-003, INV-004, INV-005]
+addresses: [RISK-001]
+baseline: v1
+depends_on: [T-002, T-007]
+owns:
+  - templates/eos/
+  - roles/common/
+  - roles/vlan_interface/
+  - roles/routing/
+  - netbox/intended/lab-eos.yml
+  - playbooks/proof/
+  - scripts/render_idempotency.py
+must_not_touch:
+  - inventories/lab.yml
+shared_owner: false
+risk: MODERATE
+review_required: false
+objective: >
+  EOS renders from the same intended-state shape as IOS; roles keep business
+  logic in main.yml and dispatch module calls to <vendor>.yml.
+acceptance:
+  - id: A1
+    text: Every template of each vendor renders byte-identical twice; zero matching devices fails.
+    verified_by: V1
+  - id: A2
+    text: Role main.yml holds no vendor module; each role implements ios and eos.
+    verified_by: V2
+  - id: A3
+    text: EOS module argument specs validate with zero device contact.
+    verified_by: V3
+verify:
+  - id: V1
+    cmd: python scripts/render_idempotency.py --input netbox/intended/lab-eos.yml --vendor eos --repo .
+    expect: exit 0
+  - id: V2
+    cmd: pytest scripts/tests/test_role_dispatch.py -q
+    expect: exit 0
+  - id: V3
+    cmd: ansible-playbook playbooks/proof/rendered.yml -e netaut_proof_vendor=eos
+    expect: exit 0, failed=0
+out_of_scope:
+  - Live device contact (T-009..T-011)

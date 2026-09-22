@@ -1,6 +1,17 @@
 # Changelog
 
-Generated from commit history (`git log --oneline`). Unreleased: no tags yet.
+Generated from commit history (`git log --oneline`).
+
+## Unreleased (cEOS live lab, ACR-005)
+
+- T-008: EOS render twins, per-role vendor dispatch, all-template render proof, device-less argspec proof in CI
+- T-009..T-011: containerlab cEOS topology, eos inventory, `live_guard` (backup, drift post-check, verified restore), `make lab-*`; live evidence pending image
+- Fixes: ios static-route render line join, ios_system argspec, CI yamllint on installed collections
+- Decisions: ACR-005, ADR-006, ADR-005 accepted
+
+## v1.0.0 (2026-09-22)
+
+Device-less baseline: everything below.
 
 ## Waves (features)
 

@@ -1,0 +1,43 @@
+COMPLETION REPORT — T-008 (EOS render + per-role vendor dispatch)
+Executor: ORCHESTRATOR (single-agent sequential run). Baseline: v1. ACR-005.
+Date: 2026-09-22.
+
+## Files
+- netbox/schema.yml (platform_allowed [ios, eos]), netbox/intended/lab-eos.yml
+- templates/eos/vlan_interface.j2, templates/eos/routing/static.j2
+- scripts/render_idempotency.py: every template per vendor, platform filter,
+  zero matching devices fails closed
+- roles/{common,vlan_interface,routing}/tasks/{main,ios,eos}.yml + defaults
+  (netaut_vendor, netaut_module_state)
+- playbooks/proof/rendered.yml (device-less argspec proof)
+- scripts/tests/ (validate, render, dispatch), role eos render tests
+- requirements.yml (+ arista.eos), ci_gate.py, ci.yml, Makefile
+
+## Verification (orchestrator rerun)
+V1 render_idempotency: ios sample OK (vlan_interface + routing, both hosts);
+   eos lab-eos OK (4 renders IDENTICAL); eos vs ios-only sample -> rc 1
+   "no devices with platform eos" (fail closed, no vacuous pass).
+V2 pytest roles scripts/tests -q -> 54 passed (was 18 at v1.0.0).
+V3 rendered proof, WSL, ansible-core 2.21.4, arista.eos 12.3.0:
+   eos -> ok=19 failed=0 (eos_system skipped: legacy module, no rendered state).
+   ios -> common passes; cisco.ios 11.6.0 ios_vlans opens a connection even
+   in rendered state (paramiko), so the ios proof stops there. CI runs the
+   eos proof only.
+make gates -> rc 0 (yamllint, secret scan, both models, both renders, tests).
+
+## Bugs found during execution (recorded, none silent)
+1. templates/ios/routing/static.j2: trailing {% endif %} under trim_blocks
+   glued the named static route onto the next prefix-list line. The T-007
+   test checked substrings only. Fixed + regression tests (commit 9f2d756).
+2. roles/common ios_system: passed `config:` and `state: merged`; the module
+   is legacy (no config key, state present/absent). It would have failed on
+   the first live IOS wave. Found by the rendered proof (commit 45fa54d).
+3. main CI had been red since e3785ae: yamllint linted galaxy collections
+   installed into ./collections (fixed in PR #4 before this task).
+
+## Invariants / risks
+INV-003 preserved and now tested: main.yml holds no vendor module
+(test_role_dispatch). INV-004: vendor assert fails closed for unknown
+platforms. INV-005 unchanged (policy_check). pi_check not run in this
+session (tool not available here); orchestration files follow the
+existing formats.
