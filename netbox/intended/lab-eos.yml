@@ -1,0 +1,59 @@
+# cEOS lab intended state (T-008, ACR-005). Same intent as sample.yml (ios),
+# EOS platform and interface names. Desired state only (INV-002).
+# No secrets in this file (INV-001); credentials come from Vault at runtime.
+sites:
+  - name: LAB-DC1
+    description: Containerlab test site
+vrfs:
+  - name: MGMT
+    rd: "65000:99"
+vlans:
+  - id: 99
+    name: MGMT
+    vrf: MGMT
+prefixes:
+  - prefix: 10.0.0.0/24
+    vlan: 99
+    vrf: MGMT
+devices:
+  - name: lab-sw01
+    site: LAB-DC1
+    platform: eos
+    interfaces:
+      - name: Ethernet1
+        description: mgmt-uplink
+        access_vlan: 99
+    common:
+      ntp_servers: [10.0.0.53]
+      dns_servers: [10.0.0.53]
+      syslog_servers: [10.0.0.54]
+  - name: lab-sw02
+    site: LAB-DC1
+    platform: eos
+    interfaces:
+      - name: Ethernet1
+        description: mgmt-uplink
+        access_vlan: 99
+    common:
+      ntp_servers: [10.0.0.53]
+      dns_servers: [10.0.0.53]
+      syslog_servers: [10.0.0.54]
+# Static routing policy (T-007, REQ-008, ACR-004). Global sections applied
+# per host by roles/routing when live. Neighbors/OSPF/BGP excluded.
+static_routes:
+  - prefix: 192.0.2.0/24
+    next_hop: 10.0.0.1
+    name: LAB-WAN
+prefix_lists:
+  - name: PL-LAB-LOCAL
+    description: lab local prefixes
+    sequences:
+      - seq: 5
+        action: permit
+        prefix: 10.0.0.0/24
+route_maps:
+  - name: RM-LAB-OUT
+    sequences:
+      - seq: 10
+        action: permit
+        match_prefix_list: PL-LAB-LOCAL

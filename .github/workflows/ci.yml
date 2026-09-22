@@ -31,11 +31,14 @@ jobs:
       - name: Validate intended-state model
         run: python scripts/validate_model.py --schema netbox/schema.yml --input netbox/intended/sample.yml
 
+      - name: Validate EOS lab intended state
+        run: python scripts/validate_model.py --schema netbox/schema.yml --input netbox/intended/lab-eos.yml
+
       - name: Prove render idempotency
         run: python scripts/render_idempotency.py --input netbox/intended/sample.yml --vendor ios --repo .
 
       - name: Role and gate test suites
-        run: python -m pytest roles -q
+        run: python -m pytest roles scripts/tests -q
 
       - name: Ansible syntax checks
         env:
