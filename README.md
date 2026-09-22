@@ -33,10 +33,12 @@ intended state. Reruns produce byte-identical output (no noise).
 ## Quickstart (lab)
 
 ```bash
-pip install pyyaml pytest jinja2 ansible-core
+pip install pyyaml pytest jinja2 ansible-core yamllint
 ansible-galaxy collection install -r requirements.yml
 
-# full local gate chain (must be green before merge)
+# full local gate chain incl. yamllint (must be green before merge)
+make gates
+# or, without make (no yamllint step):
 python scripts/ci_gate.py --sample netbox/intended/sample.yml
 
 # dry runs, no devices touched
@@ -55,10 +57,10 @@ everything below is proven device-less.
 - Pre-check aborts on seeded IP/VLAN conflicts with zero connections opened.
 - Forced post-check failure stops the wave, runs rollback, records FAILED (drilled).
 - Drift fixtures detected with read-only inputs (hashes untouched).
-- 13 tests green; hosted CI green; `pi_check all` green (12/12 gates, HIGH tier).
+- Role and gate test suites green (`make test`); hosted CI green; `pi_check all` green (12/12 gates, HIGH tier).
 
 See `docs/architecture.md` (ARCH_BASELINE v1), `docs/decisions/`,
-`reports/T-000.txt` … `reports/T-005.txt`, and `docs/orchestration/`.
+`reports/T-000.txt` … `reports/T-007.txt` (no T-006: dropped by ACR-003), and `docs/orchestration/`.
 
 ## Scope phases
 
