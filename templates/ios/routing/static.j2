@@ -1,5 +1,5 @@
 {% for r in netaut_static_routes %}
-ip route {{ r.prefix }} {{ r.next_hop }}{% if r.name %} name {{ r.name }}{% endif %}
+ip route {{ r.prefix }} {{ r.next_hop }}{{ (" name " ~ r.name) if r.name is defined and r.name else "" }}
 {% endfor %}
 {% for pl in netaut_prefix_lists %}
 {% for s in pl.sequences %}

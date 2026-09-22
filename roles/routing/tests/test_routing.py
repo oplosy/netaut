@@ -83,3 +83,17 @@ def test_policy_tool_opens_no_device_connections():
               "urllib", "ansible", "pyats", "pexpect", "ssh"]
     hits = [b for b in banned if b in source]
     assert not hits, f"network-capable imports in policy tool: {hits}"
+
+
+def test_each_command_on_its_own_line():
+    """Regression: a trailing {% endif %} under trim_blocks glued the named
+    static route onto the next prefix-list line."""
+    lines = render(routing_context(sample_data())).splitlines()
+    assert "ip route 192.0.2.0/24 10.0.0.1 name LAB-WAN" in lines
+    assert "ip prefix-list PL-LAB-LOCAL seq 5 permit 10.0.0.0/24" in lines
+
+
+def test_unnamed_route_renders_without_name():
+    context = routing_context(sample_data())
+    context["netaut_static_routes"] = [{"prefix": "198.51.100.0/24", "next_hop": "10.0.0.1"}]
+    assert "ip route 198.51.100.0/24 10.0.0.1" in render(context).splitlines()
