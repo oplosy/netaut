@@ -1,0 +1,43 @@
+---
+# IOS module calls for static routes and policy (T-007, T-008 split). Module arguments only (INV-003).
+- name: Ensure static routes exist
+  cisco.ios.ios_static_routes:
+    config:
+      - address_families:
+          - afi: ipv4
+            routes:
+              - dest: "{{ item.prefix }}"
+                next_hops:
+                  - forward_router_address: "{{ item.next_hop }}"
+                    name: "{{ item.name | default(omit) }}"
+    state: "{{ netaut_module_state }}"
+  loop: "{{ netaut_static_routes }}"
+
+- name: Ensure prefix lists exist
+  cisco.ios.ios_prefix_lists:
+    config:
+      - afi: ipv4
+        prefix_lists:
+          - name: "{{ item.0.name }}"
+            description: "{{ item.0.description | default(omit) }}"
+            entries:
+              - action: "{{ item.1.action }}"
+                prefix: "{{ item.1.prefix }}"
+                sequence: "{{ item.1.seq }}"
+    state: "{{ netaut_module_state }}"
+  loop: "{{ netaut_prefix_lists | subelements('sequences') }}"
+
+- name: Ensure route maps exist
+  cisco.ios.ios_route_maps:
+    config:
+      - route_map: "{{ item.0.name }}"
+        entries:
+          - action: "{{ item.1.action }}"
+            sequence: "{{ item.1.seq }}"
+            match:
+              ip:
+                address:
+                  prefix_lists:
+                    - "{{ item.1.match_prefix_list }}"
+    state: "{{ netaut_module_state }}"
+  loop: "{{ netaut_route_maps | subelements('sequences') }}"

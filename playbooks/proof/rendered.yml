@@ -1,0 +1,39 @@
+---
+# Device-less argspec proof (T-008): runs every role with state=rendered on
+# localhost, so module argument specs are validated with zero device contact.
+# network_cli is required by the network action plugins; rendered state never
+# opens the persistent connection.
+# Run per vendor: -e netaut_proof_vendor=eos | ios
+- name: Rendered-state proof per vendor
+  hosts: localhost
+  gather_facts: false
+  vars:
+    netaut_module_state: rendered
+    netaut_proof_vendor: eos
+    netaut_intended_file: "{{ playbook_dir }}/../../netbox/intended/{{ 'lab-eos' if netaut_proof_vendor == 'eos' else 'sample' }}.yml"
+    netaut_data: "{{ lookup('ansible.builtin.file', netaut_intended_file) | from_yaml }}"
+    netaut_vendor: "{{ netaut_proof_vendor }}"
+    # implicit localhost pins ansible_connection=local as a host var; override it.
+    ansible_connection: ansible.netcommon.network_cli
+    ansible_network_os: "{{ 'arista.eos.eos' if netaut_proof_vendor == 'eos' else 'cisco.ios.ios' }}"
+  tasks:
+    - name: Common settings
+      ansible.builtin.include_role:
+        name: common
+      vars:
+        netaut_common: "{{ netaut_data.devices[0].common }}"
+
+    - name: VLANs and interfaces
+      ansible.builtin.include_role:
+        name: vlan_interface
+      vars:
+        netaut_vlans: "{{ netaut_data.vlans }}"
+        netaut_interfaces: "{{ netaut_data.devices[0].interfaces }}"
+
+    - name: Routing
+      ansible.builtin.include_role:
+        name: routing
+      vars:
+        netaut_static_routes: "{{ netaut_data.static_routes }}"
+        netaut_prefix_lists: "{{ netaut_data.prefix_lists }}"
+        netaut_route_maps: "{{ netaut_data.route_maps }}"
