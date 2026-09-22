@@ -87,3 +87,29 @@ def test_missing_config_file_is_error(tmp_path):
 
 def test_no_secret_material_in_snapshot():
     assert "sha512" not in json.dumps(eos_snapshot.parse(read("clean.cfg")))
+
+
+def test_compare_catches_changes_outside_parsed_fields(tmp_path):
+    """Restore proof covers the whole config, not only VLAN/ports/common."""
+    extra = tmp_path / "extra.cfg"
+    extra.write_text(read("clean.cfg").replace("end\n", "ip route 192.0.2.0/24 10.0.0.1\n!\nend\n"),
+                     encoding="utf-8")
+    res = subprocess.run([sys.executable, str(TOOL), "--compare", str(FIX / "clean.cfg"),
+                          str(extra)], capture_output=True, text=True)
+    assert res.returncode == 2
+    assert "config lines" in res.stdout
+    assert "192.0.2.0" not in res.stdout  # counts only, never config content
+
+
+def test_compare_ignores_comment_header_lines(tmp_path):
+    other = tmp_path / "other.cfg"
+    other.write_text(read("clean.cfg").replace("! device: lab-sw01", "! device: lab-sw01 (later)"),
+                     encoding="utf-8")
+    res = subprocess.run([sys.executable, str(TOOL), "--compare", str(FIX / "clean.cfg"),
+                          str(other)], capture_output=True, text=True)
+    assert res.returncode == 0, res.stdout
+
+
+def test_malformed_access_vlan_line_is_ignored():
+    snap = eos_snapshot.parse("interface Ethernet1\n   switchport access vlan\n")
+    assert snap["interfaces"] == []

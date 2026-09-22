@@ -11,6 +11,10 @@ default VLAN%04d; `vlan 10,20-21` expands; only interfaces with an explicit
 `switchport access vlan N` are reported; ntp/dns/logging accept an optional
 `vrf X` qualifier and keep IP tokens only.
 
+--compare (restore proof) checks the parsed fields AND the whole config
+with comment lines removed, so a difference anywhere fails. It prints only
+field names and line counts, never config content (hashed secrets).
+
 Exit codes: 0 ok / equal, 2 --compare found differences, 1 error.
 """
 from __future__ import annotations
@@ -81,7 +85,8 @@ def parse(text: str) -> dict:
         if block and block[0] == "vlan" and tok[0] == "name" and len(tok) >= 2:
             for vid in block[1]:
                 vlans[vid] = " ".join(tok[1:])
-        elif block and block[0] == "interface" and tok[:3] == ["switchport", "access", "vlan"]:
+        elif (block and block[0] == "interface" and tok[:3] == ["switchport", "access", "vlan"]
+              and len(tok) > 3 and tok[3].isdigit()):
             ifaces[block[1]] = int(tok[3])
     vlans.pop(1, None)
     return {
@@ -90,6 +95,12 @@ def parse(text: str) -> dict:
         "common": {"ntp_servers": sorted(ntp), "dns_servers": sorted(dns),
                    "syslog_servers": sorted(syslog)},
     }
+
+
+def config_lines(text: str) -> list[str]:
+    """Whole config without comments/blank lines: the restore-equality basis."""
+    return [ln.rstrip() for ln in text.splitlines()
+            if ln.strip() and not ln.lstrip().startswith("!")]
 
 
 def _read(path: str) -> str:
@@ -105,12 +116,18 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         if args.compare:
-            a, b = (parse(_read(p)) for p in args.compare)
-            if a == b:
-                print("compare OK: snapshots equal")
+            texts = [_read(p) for p in args.compare]
+            a, b = (parse(t) for t in texts)
+            la, lb = (config_lines(t) for t in texts)
+            diffs = [k for k in a if a[k] != b[k]]
+            if la != lb:
+                only_a = len(set(la) - set(lb))
+                only_b = len(set(lb) - set(la))
+                diffs.append(f"config lines ({only_a} only in A, {only_b} only in B)")
+            if not diffs:
+                print("compare OK: configs equal")
                 return 0
-            keys = [k for k in a if a[k] != b[k]]
-            print(f"compare DIFFERS: {', '.join(keys)}")
+            print(f"compare DIFFERS: {', '.join(diffs)}")
             return 2
         if not args.config or not args.out:
             parser.error("--config NAME=PATH and --out are required without --compare")
