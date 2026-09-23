@@ -64,3 +64,21 @@ def test_main_fails_before_any_play_when_a_host_is_not_ready(monkeypatch, capsys
     assert rc == 1
     assert "image: img:1" in out
     assert "not ready: lab-sw02" in out
+
+
+def test_failed_drill_stops_before_deploy_and_names_the_hosts(monkeypatch, capsys):
+    """Review T-015 I3: no deploy/rerun on a lab whose restore was not verified."""
+    import subprocess
+    calls = []
+
+    def fake_play(inventory, wave, extra):
+        calls.append(wave)
+        return subprocess.CompletedProcess([], 2, "restore verified for lab-sw01\n", "")
+
+    monkeypatch.setattr(lab_verify, "play", fake_play)
+    rc = lab_verify.main(["--inventory", str(REPO / "inventories" / "lab-srlinux.yml"),
+                          "--wave", "W-t"])
+    out = capsys.readouterr().out
+    assert rc == 1
+    assert calls == ["W-t-a"]
+    assert "restore not verified: lab-sw02" in out

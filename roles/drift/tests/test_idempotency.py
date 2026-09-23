@@ -89,3 +89,18 @@ def test_device_filter_ignores_other_devices(tmp_path):
 def test_device_filter_unknown_device_is_error(tmp_path):
     res = run_tool(SNAP_DIR / "clean.json", tmp_path / "r.md", ("--device", "nope"))
     assert res.returncode == 1
+
+
+def test_intended_interface_missing_operationally_is_drift(tmp_path):
+    """Review T-015 C1: a port the device does not report as access is drift."""
+    snap = tmp_path / "no-iface.json"
+    snap.write_text(
+        '{"devices": {"lab-sw01": {"vlans": [{"id": 99, "name": "MGMT"}],'
+        ' "interfaces": [],'
+        ' "common": {"ntp_servers": ["10.0.0.53"], "dns_servers": ["10.0.0.53"],'
+        ' "syslog_servers": ["10.0.0.54"]}}}}', encoding="utf-8")
+    report = tmp_path / "r.md"
+    res = run_tool(snap, report, ("--device", "lab-sw01", "--fail-on-drift"))
+    assert res.returncode == 2
+    assert "intended interface GigabitEthernet0/0 missing operationally" in report.read_text(
+        encoding="utf-8")

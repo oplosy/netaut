@@ -60,6 +60,10 @@ def diff_device(name: str, intended: dict, operational: dict,
                 f"{name}: interface {i['name']} vlan drift: "
                 f"intended {intended_ifaces[i['name']]} vs operational {i.get('access_vlan')}"
             )
+    operational_ifaces = {i["name"] for i in operational.get("interfaces", [])}
+    for iname in intended_ifaces:
+        if iname not in operational_ifaces:
+            drifts.append(f"{name}: intended interface {iname} missing operationally")
 
     for key in ("ntp_servers", "dns_servers", "syslog_servers"):
         want = sorted((intended.get("common", {}) or {}).get(key, []))

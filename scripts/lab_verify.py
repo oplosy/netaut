@@ -102,9 +102,18 @@ def main(argv: list[str] | None = None) -> int:
 
     drill = play(args.inventory, f"{args.wave}-a",
                  extra + ["-e", "netaut_force_postcheck_fail=true"])
-    restored = all(f"restore verified for {h}" in drill.stdout for h in HOSTS)
+    unverified = [h for h in HOSTS if f"restore verified for {h}" not in drill.stdout]
+    restored = not unverified
     results.append(("drill", drill.returncode != 0 and restored,
                     f"rc={drill.returncode} restore_verified={restored}"))
+    if not results[-1][1]:
+        # The lab is in an unknown state: never run more waves on it.
+        print(f"drill: FAIL ({results[-1][2]})")
+        if unverified:
+            print(f"restore not verified: {', '.join(unverified)}")
+        print(drill.stdout[-4000:])
+        print("lab-verify FAILED")
+        return 1
 
     first = play(args.inventory, f"{args.wave}-b", extra)
     results.append(("deploy", first.returncode == 0, f"rc={first.returncode}"))
@@ -117,7 +126,7 @@ def main(argv: list[str] | None = None) -> int:
     for name, ok, detail in results:
         print(f"{name}: {'PASS' if ok else 'FAIL'} ({detail})")
     if not all(ok for _, ok, _ in results):
-        for proc in (drill, first, second):
+        for proc in (first, second):
             print(proc.stdout[-4000:])
         print("lab-verify FAILED")
         return 1

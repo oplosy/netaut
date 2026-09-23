@@ -124,3 +124,16 @@ def test_srlinux_restore_value_is_not_templated(tmp_path):
     assert res.returncode == 0, res.stdout[-2000:]
     restored = json.loads(result.read_text(encoding="utf-8"))
     assert restored["system"]["banner"]["login-banner"] == "{{ 6 * 7 }}"
+
+
+def test_postcheck_keeps_the_raw_fetch_apart_from_the_snapshot():
+    """Review T-015 I1: the snapshot must not overwrite the fetched datastore."""
+    tasks = load(TASKS / "postcheck.yml")
+    fetch = next(t for t in tasks if t["name"] == "Fetch post-wave running-config")
+    fetched = fetch["vars"]["live_guard_fetch_to"]
+    snap = next(t for t in tasks if t["name"] == "Build operational snapshot from running-config")
+    argv = snap["ansible.builtin.command"]["argv"]
+    out = argv[argv.index("--out") + 1]
+    assert argv[argv.index("--config") + 1].endswith("=" + fetched)
+    for ext in ("cfg", "json"):  # live_guard_ext for eos and srlinux
+        assert fetched.replace("{{ live_guard_ext }}", ext) != out, ext
