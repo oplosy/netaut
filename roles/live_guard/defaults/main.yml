@@ -8,3 +8,6 @@ netaut_vendor: "{{ ansible_network_os | default('') | split('.') | last }}"
 live_guard_restore_src: "{{ netaut_run_dir }}/{{ inventory_hostname }}-restore-src.cfg"
 live_guard_files: "{{ role_path }}/files"
 live_guard_drift: "{{ role_path }}/../drift/files/drift.py"
+# Backup/fetch file extension per vendor (T-015): eos keeps text configs,
+# srlinux keeps the running datastore as JSON.
+live_guard_ext: "{{ {'srlinux': 'json'}.get(netaut_vendor, 'cfg') }}"

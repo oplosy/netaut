@@ -1,0 +1,12 @@
+---
+# SR Linux restore (T-015): replace / with the backup in one commit, so the
+# device lands exactly on the backup, not a merge of backup and wave (proven
+# byte-equal on 26.7.2). The file lookup is data, not a template: braces in
+# descriptions or banners reach the device verbatim (contract-tested).
+- name: Replace running datastore with backup
+  nokia.srlinux.config:
+    replace:
+      - path: /
+        value: "{{ lookup('ansible.builtin.file', netaut_backup_file) | from_json }}"
+    save_when: never
+  no_log: true

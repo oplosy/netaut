@@ -1,6 +1,10 @@
 """live_guard contract (T-011): every entry point fails closed per vendor."""
+import json
 import pathlib
+import shutil
+import subprocess
 
+import pytest
 import yaml
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
@@ -19,14 +23,14 @@ def guards(tasks):
 def test_entry_points_assert_vendor_and_wave_before_anything():
     for entry in ("backup", "postcheck"):
         assert guards(load(TASKS / f"{entry}.yml")) == [
-            "netaut_vendor in ['eos']", "netaut_wave | default('') | length > 0"], entry
+            "netaut_vendor in ['eos', 'srlinux']", "netaut_wave | default('') | length > 0"], entry
 
 
 def test_restore_guards_run_first_inside_the_backup_block():
     block = next(t for t in load(TASKS / "restore.yml") if "block" in t)
     assert block["when"] == "netaut_backup_file is defined"
     assert guards(block["block"]) == [
-        "netaut_vendor in ['eos']", "netaut_wave | default('') | length > 0"]
+        "netaut_vendor in ['eos', 'srlinux']", "netaut_wave | default('') | length > 0"]
 
 
 def test_ios_has_no_live_implementation_yet():
@@ -70,3 +74,53 @@ def test_restore_source_is_wrapped_in_raw():
     text = (TASKS / "eos" / "restore.yml").read_text(encoding="utf-8")
     assert "{% raw %}" in text and "{% endraw %}" in text
     assert "src: \"{{ live_guard_restore_src }}\"" in text
+
+
+def test_backup_paths_use_the_vendor_extension():
+    defaults = (ROLE / "defaults" / "main.yml").read_text(encoding="utf-8")
+    assert "live_guard_ext:" in defaults
+    for entry in ("backup.yml", "postcheck.yml", "restore.yml", "eos/backup.yml"):
+        text = (TASKS / entry).read_text(encoding="utf-8")
+        assert ".cfg" not in text, entry
+        assert "live_guard_ext" in text, entry
+
+
+def test_srlinux_secret_tasks_are_no_log():
+    """Review focus 4: backups and fetches carry the admin password hash."""
+    for action in ("backup", "fetch", "restore"):
+        for task in load(TASKS / "srlinux" / f"{action}.yml"):
+            if any(k.startswith("nokia.srlinux.") or k == "ansible.builtin.copy" for k in task):
+                assert task.get("no_log") is True, (action, task["name"])
+
+
+def test_srlinux_restore_replaces_root_and_never_saves():
+    (task,) = [t for t in load(TASKS / "srlinux" / "restore.yml")
+               if "nokia.srlinux.config" in t]
+    cfg = task["nokia.srlinux.config"]
+    assert cfg["replace"][0]["path"] == "/"
+    assert cfg["save_when"] == "never"
+
+
+@pytest.mark.skipif(shutil.which("ansible-playbook") is None, reason="needs ansible-core")
+def test_srlinux_restore_value_is_not_templated(tmp_path):
+    """Review focus 1: braces in the backup must reach the device verbatim."""
+    (task,) = [t for t in load(TASKS / "srlinux" / "restore.yml")
+               if "nokia.srlinux.config" in t]
+    expr = task["nokia.srlinux.config"]["replace"][0]["value"]
+    backup = tmp_path / "b.json"
+    backup.write_text(json.dumps({"system": {"banner": {"login-banner": "{{ 6 * 7 }}"}}}),
+                      encoding="utf-8")
+    result = tmp_path / "out.json"
+    play = [{
+        "hosts": "localhost", "gather_facts": False,
+        "vars": {"netaut_backup_file": backup.as_posix(), "restored": expr},
+        "tasks": [{"ansible.builtin.copy": {
+            "content": "{{ restored | to_json }}", "dest": result.as_posix()}}],
+    }]
+    path = tmp_path / "p.yml"
+    path.write_text(yaml.safe_dump(play), encoding="utf-8")
+    res = subprocess.run(["ansible-playbook", "-i", "localhost,", "-c", "local", str(path)],
+                         capture_output=True, text=True)
+    assert res.returncode == 0, res.stdout[-2000:]
+    restored = json.loads(result.read_text(encoding="utf-8"))
+    assert restored["system"]["banner"]["login-banner"] == "{{ 6 * 7 }}"

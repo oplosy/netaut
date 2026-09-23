@@ -5,7 +5,7 @@
 - name: Require a vendor with a live implementation (fail closed)
   ansible.builtin.assert:
     that:
-      - netaut_vendor in ['eos']
+      - netaut_vendor in ['eos', 'srlinux']
     fail_msg: "live_guard: no live implementation for vendor {{ netaut_vendor }}"
 
 - name: Require a wave id (fail closed)
@@ -17,7 +17,7 @@
 - name: Fetch post-wave running-config
   ansible.builtin.include_tasks: "{{ netaut_vendor }}/fetch.yml"
   vars:
-    live_guard_fetch_to: "{{ netaut_run_dir }}/{{ inventory_hostname }}-post.cfg"
+    live_guard_fetch_to: "{{ netaut_run_dir }}/{{ inventory_hostname }}-post.{{ live_guard_ext }}"
 
 - name: Build operational snapshot from running-config
   ansible.builtin.command:
@@ -25,7 +25,7 @@
       - python3
       - "{{ live_guard_files }}/{{ netaut_vendor }}_snapshot.py"
       - --config
-      - "{{ inventory_hostname }}={{ netaut_run_dir }}/{{ inventory_hostname }}-post.cfg"
+      - "{{ inventory_hostname }}={{ netaut_run_dir }}/{{ inventory_hostname }}-post.{{ live_guard_ext }}"
       - --out
       - "{{ netaut_run_dir }}/{{ inventory_hostname }}-post.json"
   delegate_to: localhost

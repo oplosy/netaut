@@ -5,5 +5,5 @@
     backup: true
     backup_options:
       dir_path: "{{ netaut_backup_dir }}"
-      filename: "{{ inventory_hostname }}-{{ netaut_wave }}.cfg"
+      filename: "{{ inventory_hostname }}-{{ netaut_wave }}.{{ live_guard_ext }}"
   changed_when: false
