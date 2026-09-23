@@ -1,0 +1,32 @@
+{
+  "_annotate": "ACL rules allowing incoming tcp/57411 for the eda-discovery grpc server",
+  "srl_nokia-interfaces:interface": [
+    {"admin-state": "enable", "description": "mgmt-uplink", "name": "ethernet-1/1",
+     "srl_nokia-interfaces-vlans:vlan-tagging": true,
+     "subinterface": [{"index": 0,
+                       "srl_nokia-interfaces-vlans:vlan": {"encap": {"untagged": {}}},
+                       "type": "srl_nokia-interfaces:bridged"}]},
+    {"admin-state": "enable", "name": "mgmt0",
+     "subinterface": [{"admin-state": "enable", "index": 0,
+                       "ipv4": {"admin-state": "enable", "srl_nokia-interfaces-ip-dhcp:dhcp-client": {}}}]}
+  ],
+  "srl_nokia-network-instance:network-instance": [
+    {"admin-state": "enable", "description": "Management network instance",
+     "interface": [{"name": "mgmt0.0"}], "name": "mgmt",
+     "type": "srl_nokia-network-instance:ip-vrf"},
+    {"description": "MGMT", "interface": [{"name": "ethernet-1/1.0"}], "name": "vlan-99",
+     "type": "srl_nokia-network-instance:mac-vrf"}
+  ],
+  "srl_nokia-system:system": {
+    "srl_nokia-dns:dns-instance": [
+      {"name": "clab-default", "network-instance": "mgmt", "server-list": ["10.0.0.53"]}
+    ],
+    "srl_nokia-logging:logging": {
+      "buffer": [{"buffer-name": "messages", "rotate": 3, "size": "10000000"}],
+      "network-instance": "mgmt",
+      "remote-server": [{"host": "10.0.0.54"}]
+    },
+    "srl_nokia-ntp:ntp": {"admin-state": "enable", "network-instance": "mgmt",
+                          "server": [{"address": "10.0.0.53"}]}
+  }
+}
