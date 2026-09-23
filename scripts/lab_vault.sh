@@ -7,7 +7,9 @@
 set -euo pipefail
 vault_file="${1:?vault file path}"
 pass_file="${2:?vault password file path}"
-login="${3:-admin}"
+# The login comes from the environment (make lab-vault sets LAB_LOGIN), never
+# from argv, so it does not show up in the process list.
+login="${LAB_LOGIN:-admin}"
 if [ -f "$vault_file" ]; then
   echo "lab-vault: $vault_file exists, leaving it untouched"
   exit 0
