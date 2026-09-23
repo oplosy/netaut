@@ -1,0 +1,21 @@
+# Free live lab (T-013, ADR-007). Public image, no account needed.
+# Deploy through `make lab-up LAB=srlinux`: it puts containerlab's lab dir on
+# the Linux filesystem (CLAB_LABDIR_BASE). Under /mnt/c SR Linux cannot set
+# file permissions and its startup commit fails, so JSON-RPC never opens.
+name: netaut-srlinux
+mgmt:
+  network: netaut-srlinux-mgmt
+  ipv4-subnet: 172.20.21.0/24
+topology:
+  kinds:
+    nokia_srlinux:
+      image: ${SRLINUX_IMAGE:=ghcr.io/nokia/srlinux:26.7.2}
+  nodes:
+    lab-sw01:
+      kind: nokia_srlinux
+      mgmt-ipv4: 172.20.21.11
+    lab-sw02:
+      kind: nokia_srlinux
+      mgmt-ipv4: 172.20.21.12
+  links:
+    - endpoints: ["lab-sw01:e1-1", "lab-sw02:e1-1"]
