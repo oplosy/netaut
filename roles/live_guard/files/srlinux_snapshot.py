@@ -14,8 +14,8 @@ values are stripped of them before anything is read.
 Rules: a VLAN is a network-instance named `vlan-<id>` of type mac-vrf; its
 name is the description (or the instance name when unset). An access port is
 an interface whose only subinterface is index 0, `bridged` with `untagged`
-encapsulation, and a member of such a mac-vrf. NTP/DNS/syslog keep IP values only; DNS is the
-union of every dns-instance's server-list.
+encapsulation, and a member of such a mac-vrf. NTP/DNS/syslog keep IP values
+only; DNS is the union of every dns-instance's server-list.
 
 --compare (restore proof) checks the parsed fields AND the whole document
 (canonical JSON), so a difference anywhere fails. It prints only field names,
@@ -139,7 +139,9 @@ def main(argv: list[str] | None = None) -> int:
         with open(args.out, "w", encoding="utf-8") as f:
             json.dump({"devices": devices, "provenance": "live running datastore (srlinux)"},
                       f, indent=2, sort_keys=True)
-    except (OSError, ValueError) as exc:
+    # Any failure (unreadable file, bad JSON, unexpected shape) is rc 1 with the
+    # error type only: messages and tracebacks can quote backup content.
+    except Exception as exc:  # noqa: BLE001
         print(f"srlinux-snapshot ERROR: {type(exc).__name__}", file=sys.stderr)
         return 1
     print(f"srlinux-snapshot OK: {len(devices)} device(s) -> {args.out}")
