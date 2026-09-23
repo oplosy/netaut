@@ -202,3 +202,15 @@ def test_compare_sees_differences_that_prefix_stripping_would_hide():
     d = copy.deepcopy(base)
     d["srl_nokia-interfaces:interface"][0]["description"] = "srl_nokia-y:bar"
     assert srlinux_snapshot.compare(c, d) == ["config sections differ: interface"]
+
+
+def test_malformed_document_is_a_clean_error(tmp_path):
+    """Review T-015 minor 3: no traceback, only the error type, rc 1."""
+    bad = tmp_path / "bad.json"
+    bad.write_text('{"system": []}', encoding="utf-8")
+    for args in (("--config", f"x={bad}", "--out", tmp_path / "o.json"),
+                 ("--compare", bad, bad)):
+        res = cli(*args)
+        assert res.returncode == 1, args
+        assert "Traceback" not in res.stderr
+        assert res.stderr.strip() == "srlinux-snapshot ERROR: AttributeError"
