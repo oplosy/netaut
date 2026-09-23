@@ -1,0 +1,36 @@
+---
+# SR Linux module calls for VLANs and access ports (T-012). Module arguments
+# only (INV-003). A VLAN is a mac-vrf named vlan-<id>; an access port is a
+# bridged, untagged subinterface 0 that is a member of that mac-vrf.
+# SR Linux accepts untagged encap only with vlan-tagging on the parent.
+# Moving a port to another VLAN fails the commit (ADR-007 known gap).
+- name: Ensure VLANs exist
+  nokia.srlinux.config:
+    update:
+      - path: "/network-instance[name=vlan-{{ item.id }}]"
+        value:
+          type: mac-vrf
+          description: "{{ item.name }}"
+    save_when: never
+  loop: "{{ netaut_vlans }}"
+
+- name: Ensure access interfaces
+  nokia.srlinux.config:
+    update:
+      - path: "/interface[name={{ item.name }}]"
+        value:
+          admin-state: enable
+          description: "{{ item.description }}"
+          vlan-tagging: true
+          subinterface:
+            - index: 0
+              type: bridged
+              vlan:
+                encap:
+                  untagged: {}
+      - path: "/network-instance[name=vlan-{{ item.access_vlan }}]"
+        value:
+          interface:
+            - name: "{{ item.name }}.0"
+    save_when: never
+  loop: "{{ netaut_interfaces }}"

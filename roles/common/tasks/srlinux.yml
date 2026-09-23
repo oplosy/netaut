@@ -1,0 +1,35 @@
+---
+# SR Linux module calls for common settings (T-012). Module arguments only
+# (INV-003). All three services use the management network-instance.
+# DNS replaces the server-list of the instance containerlab already created
+# (26.7 has /system/dns-instance, no /system/dns); update would keep stale
+# servers and the post-check would report drift.
+- name: Configure NTP servers
+  nokia.srlinux.config:
+    update:
+      - path: /system/ntp
+        value:
+          admin-state: enable
+          network-instance: "{{ netaut_srlinux_mgmt_instance }}"
+          server: "{{ netaut_common.ntp_servers | map('community.general.dict_kv', 'address') | list }}"
+    save_when: never
+
+- name: Configure DNS name servers
+  nokia.srlinux.config:
+    update:
+      - path: "/system/dns-instance[name={{ netaut_srlinux_dns_instance }}]"
+        value:
+          network-instance: "{{ netaut_srlinux_mgmt_instance }}"
+    replace:
+      - path: "/system/dns-instance[name={{ netaut_srlinux_dns_instance }}]/server-list"
+        value: "{{ netaut_common.dns_servers }}"
+    save_when: never
+
+- name: Configure syslog hosts
+  nokia.srlinux.config:
+    update:
+      - path: /system/logging
+        value:
+          network-instance: "{{ netaut_srlinux_mgmt_instance }}"
+          remote-server: "{{ netaut_common.syslog_servers | map('community.general.dict_kv', 'host') | list }}"
+    save_when: never

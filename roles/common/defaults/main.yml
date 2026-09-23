@@ -2,7 +2,11 @@
 # Must be overridden from intended state (netbox/intended/*.yml).
 # Null default fails closed in the role pre-assert (INV-004).
 netaut_common: null
-# Vendor dispatch (T-008): ios | eos, from ansible_network_os.
+# Vendor dispatch (T-008, T-012): ios | eos | srlinux, from ansible_network_os.
 netaut_vendor: "{{ ansible_network_os | default('') | split('.') | last }}"
 # merged for waves; the device-less proof sets rendered.
 netaut_module_state: merged
+# SR Linux (T-012): management network-instance, and the DNS instance the
+# wave owns. clab-default is the instance containerlab creates on every node.
+netaut_srlinux_mgmt_instance: mgmt
+netaut_srlinux_dns_instance: clab-default
