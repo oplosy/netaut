@@ -1,5 +1,6 @@
 """live_guard contract (T-011): every entry point fails closed per vendor."""
 import json
+import os
 import pathlib
 import shutil
 import subprocess
@@ -159,3 +160,48 @@ def test_postcheck_keeps_the_raw_fetch_apart_from_the_snapshot():
     assert argv[argv.index("--config") + 1].endswith("=" + fetched)
     for ext in ("cfg", "json"):  # live_guard_ext for eos and srlinux
         assert fetched.replace("{{ live_guard_ext }}", ext) != out, ext
+
+
+FAKE_GET = '''#!/usr/bin/python
+import json, os
+from ansible.module_utils.basic import AnsibleModule
+
+
+def main():
+    module = AnsibleModule(argument_spec={"paths": {"type": "list", "elements": "dict"}},
+                           supports_check_mode=True)
+    with open(os.environ["NETAUT_FAKE_DATASTORE"], encoding="utf-8") as f:
+        module.exit_json(changed=False, result=[json.load(f)])
+
+
+main()
+'''
+
+
+@pytest.mark.skipif(shutil.which("ansible-playbook") is None, reason="needs ansible-core")
+def test_srlinux_backup_and_fetch_write_braces_verbatim(tmp_path):
+    """Review T-015 minor 6: device text with {{ }} is data in backup and fetch too."""
+    modules = tmp_path / "coll" / "ansible_collections" / "nokia" / "srlinux" / "plugins" / "modules"
+    modules.mkdir(parents=True)
+    (modules / "get.py").write_text(FAKE_GET, encoding="utf-8")
+    datastore = tmp_path / "device.json"
+    datastore.write_text(json.dumps({"system": {"banner": {"login-banner": "{{ 6 * 7 }}"}}}),
+                         encoding="utf-8")
+    fetched = tmp_path / "fetched.json"
+    play = [{
+        "hosts": "localhost", "gather_facts": False,
+        "vars": {"netaut_backup_dir": tmp_path.as_posix(), "netaut_wave": "W-t",
+                 "live_guard_ext": "json", "live_guard_fetch_to": fetched.as_posix()},
+        "tasks": [{"ansible.builtin.include_tasks": (TASKS / "srlinux" / f"{a}.yml").as_posix()}
+                  for a in ("backup", "fetch")],
+    }]
+    path = tmp_path / "p.yml"
+    path.write_text(yaml.safe_dump(play), encoding="utf-8")
+    env = dict(os.environ, NETAUT_FAKE_DATASTORE=str(datastore),
+               ANSIBLE_COLLECTIONS_PATH=str(tmp_path / "coll"))
+    res = subprocess.run(["ansible-playbook", "-i", "localhost,", "-c", "local", str(path)],
+                         capture_output=True, text=True, env=env)
+    assert res.returncode == 0, res.stdout[-2000:]
+    for out in (tmp_path / "localhost-W-t.json", fetched):
+        doc = json.loads(out.read_text(encoding="utf-8"))
+        assert doc["system"]["banner"]["login-banner"] == "{{ 6 * 7 }}", out.name
