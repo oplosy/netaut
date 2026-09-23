@@ -18,9 +18,9 @@ intended state. Reruns produce byte-identical output (no noise).
 
 | Path | What |
 |---|---|
-| `netbox/` | Intended-state schema + `intended/sample.yml` (ios), `intended/lab-eos.yml` (eos) |
-| `inventories/` | `lab.yml` (ios, device-less), `lab-eos.yml` (cEOS lab); credentials via Vault only |
-| `lab/` | Containerlab topology: 2x Arista cEOS (ADR-006) |
+| `netbox/` | Intended-state schema + `intended/sample.yml` (ios), `intended/lab-eos.yml` (eos), `intended/lab-srlinux.yml` (srlinux) |
+| `inventories/` | `lab.yml` (ios, device-less), `lab-srlinux.yml` (SR Linux lab), `lab-eos.yml` (cEOS lab); credentials via Vault only |
+| `lab/` | Containerlab topologies: 2x SR Linux (default, ADR-007), 2x Arista cEOS (optional, ADR-006) |
 | `roles/common/` | NTP / DNS / Syslog (phase 1, low risk) |
 | `roles/vlan_interface/` | VLAN + access interfaces (phase 2) |
 | `templates/{ios,eos}/` | Raw vendor render (logic stays in roles) |
@@ -49,24 +49,26 @@ ansible-playbook playbooks/deploy/site.yml -i inventories/lab.yml --check --diff
 ansible-playbook playbooks/drift/report.yml -i inventories/lab.yml --check
 ```
 
-## Live lab (cEOS, free)
+## Live lab (SR Linux, free)
 
-Live execution is back in scope on free Arista cEOS (ACR-005). Run it from WSL:
+Live waves run on a free Nokia SR Linux lab (ACR-006). The image is public, no
+account needed. Run it from WSL Ubuntu with Docker and containerlab:
 
 ```bash
-docker import cEOS64-lab-<ver>.tar.xz ceos:<ver>   # image from a free arista.com account
-make lab-up CEOS_IMAGE=ceos:<ver>
-make lab-vault      # encrypted login under ~/.netaut, never in the repo
-make lab-verify     # drill (restore) -> deploy -> rerun changed=0
-make lab-down
+ansible-galaxy collection install -r requirements.yml
+make lab-cycle      # up -> vault -> drill (restore) -> deploy -> rerun changed=0 -> down
 ```
+
+Step by step (keep one WSL session open; WSL stops idle VMs and their
+containers): `make lab-up`, `make lab-vault`, `make lab-verify`, `make lab-down`.
+`LAB=eos` runs the same on cEOS, which needs an image from a corporate
+arista.com account (T-009..T-011, optional).
 
 A live wave is `-e netaut_mode=live -e netaut_wave=<id>`. It takes a backup
 first, post-checks real device state against intended state through the
 drift tool, and restores the backup when the post-check fails. IOS stays
 render-only: live mode fails closed there.
-**Status:** the live path is built and tested device-less; the live evidence
-(T-009..T-011) is pending the cEOS image import.
+**Status:** proven live on SR Linux 26.7.2 (reports/T-013..T-015.txt).
 
 ## Proof it works
 
@@ -84,4 +86,4 @@ See `docs/architecture.md` (ARCH_BASELINE v1), `docs/decisions/`,
 ## Scope phases
 
 1. NTP / DNS / Syslog (done) → 2. VLAN / interface (done) → 3. Static routing + policy (done, REQ-008; OSPF/BGP excluded)
-→ 4. EOS vendor (done, T-008) → 5. Live cEOS lab with backup/restore (built; live run pending image, T-009..T-011).
+→ 4. EOS vendor (done, T-008) → 5. Live lab with backup/restore: SR Linux done (T-012..T-015); cEOS built, optional (T-009..T-011).
