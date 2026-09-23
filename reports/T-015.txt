@@ -1,9 +1,9 @@
-# T-015 evidence 2026-09-23T14:18:48+03:00 (rc=0)
+# T-015 evidence 2026-09-23T15:29:08+03:00 (rc=0)
 image: ghcr.io/nokia/srlinux:26.7.2
 ready: all hosts answer on port 443
 drill: PASS (rc=2 restore_verified=True)
 lab-verify OK: all live checks passed
-# restore proof, generated from wave W-20260923-141747's local artifacts (~/.netaut, not committed):
+# restore proof, generated from wave W-20260923-152808's local artifacts (~/.netaut, not committed):
 lab-sw01: pristine backup (-a) == backup taken after the drill restore (-b): byte-equal
 lab-sw01: --compare pristine vs restored -> compare OK: configs equal
 lab-sw01: --compare pristine vs post-deploy (-c backup) -> compare DIFFERS: vlans; interfaces; common; config sections differ: interface, network-instance, system
