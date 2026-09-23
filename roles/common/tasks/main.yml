@@ -16,7 +16,7 @@
 - name: Require a supported vendor (fail closed)
   ansible.builtin.assert:
     that:
-      - netaut_vendor in ['ios', 'eos']
+      - netaut_vendor in ['ios', 'eos', 'srlinux']
     fail_msg: "no common implementation for vendor {{ netaut_vendor }}"
 
 - name: Apply vendor module calls

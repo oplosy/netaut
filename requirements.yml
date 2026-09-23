@@ -10,3 +10,7 @@ collections:
     version: ">=5.0.0"
   - name: community.general
     version: ">=8.0.0"
+  # SR Linux JSON-RPC modules (T-012, ADR-007). Exact pin: proven on
+  # SR Linux 26.7.2 during planning (config idempotency, root replace).
+  - name: nokia.srlinux
+    version: "1.1.1"
