@@ -1,0 +1,20 @@
+---
+# SR Linux running datastore fetch (T-014). Input: live_guard_fetch_to
+# (local path). Same shape as the backup, so one parser serves post-check
+# and restore proof. Never logged: it holds the admin password hash.
+- name: Read running datastore
+  nokia.srlinux.get:
+    paths:
+      - path: /
+        datastore: running
+  register: live_guard_running
+  no_log: true
+
+- name: Store fetched running datastore locally
+  ansible.builtin.copy:
+    content: "{{ live_guard_running.result[0] | to_nice_json(sort_keys=true) }}\n"
+    dest: "{{ live_guard_fetch_to }}"
+    mode: "0600"
+  delegate_to: localhost
+  changed_when: false
+  no_log: true

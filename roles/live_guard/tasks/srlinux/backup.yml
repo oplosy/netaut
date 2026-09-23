@@ -1,0 +1,20 @@
+---
+# SR Linux pre-wave backup (T-015). Reads only; the device is not changed.
+# The whole running datastore as JSON; restore replaces / with it. It holds
+# the admin password hash, so nothing here is ever logged (INV-001).
+- name: Read running datastore
+  nokia.srlinux.get:
+    paths:
+      - path: /
+        datastore: running
+  register: live_guard_backup_read
+  no_log: true
+
+- name: Save running datastore
+  ansible.builtin.copy:
+    content: "{{ live_guard_backup_read.result[0] | to_nice_json(sort_keys=true) }}\n"
+    dest: "{{ netaut_backup_dir }}/{{ inventory_hostname }}-{{ netaut_wave }}.{{ live_guard_ext }}"
+    mode: "0600"
+  delegate_to: localhost
+  changed_when: false
+  no_log: true

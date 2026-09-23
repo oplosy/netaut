@@ -13,7 +13,7 @@
     - name: Require a vendor with a live implementation (fail closed)
       ansible.builtin.assert:
         that:
-          - netaut_vendor in ['eos']
+          - netaut_vendor in ['eos', 'srlinux']
         fail_msg: "live_guard: no live implementation for vendor {{ netaut_vendor }}"
 
     - name: Require a wave id (fail closed)
@@ -28,7 +28,7 @@
     - name: Fetch restored running-config
       ansible.builtin.include_tasks: "{{ netaut_vendor }}/fetch.yml"
       vars:
-        live_guard_fetch_to: "{{ netaut_run_dir }}/{{ inventory_hostname }}-restored.cfg"
+        live_guard_fetch_to: "{{ netaut_run_dir }}/{{ inventory_hostname }}-restored.{{ live_guard_ext }}"
 
     - name: Restored state must equal backup
       ansible.builtin.command:
@@ -37,7 +37,7 @@
           - "{{ live_guard_files }}/{{ netaut_vendor }}_snapshot.py"
           - --compare
           - "{{ netaut_backup_file }}"
-          - "{{ netaut_run_dir }}/{{ inventory_hostname }}-restored.cfg"
+          - "{{ netaut_run_dir }}/{{ inventory_hostname }}-restored.{{ live_guard_ext }}"
       delegate_to: localhost
       changed_when: false
 

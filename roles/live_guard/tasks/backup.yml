@@ -4,7 +4,7 @@
 - name: Require a vendor with a live implementation (fail closed)
   ansible.builtin.assert:
     that:
-      - netaut_vendor in ['eos']
+      - netaut_vendor in ['eos', 'srlinux']
     fail_msg: "live_guard: no live implementation for vendor {{ netaut_vendor }}"
 
 - name: Require a wave id (fail closed)
@@ -26,7 +26,7 @@
 
 - name: Stat any existing backup for this wave
   ansible.builtin.stat:
-    path: "{{ netaut_backup_dir }}/{{ inventory_hostname }}-{{ netaut_wave }}.cfg"
+    path: "{{ netaut_backup_dir }}/{{ inventory_hostname }}-{{ netaut_wave }}.{{ live_guard_ext }}"
   delegate_to: localhost
   register: live_guard_backup_prior
 
@@ -43,7 +43,7 @@
 
 - name: Stat pre-wave backup
   ansible.builtin.stat:
-    path: "{{ netaut_backup_dir }}/{{ inventory_hostname }}-{{ netaut_wave }}.cfg"
+    path: "{{ netaut_backup_dir }}/{{ inventory_hostname }}-{{ netaut_wave }}.{{ live_guard_ext }}"
   delegate_to: localhost
   register: live_guard_backup_stat
 
