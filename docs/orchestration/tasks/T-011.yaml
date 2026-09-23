@@ -31,6 +31,6 @@ verify:
   - id: V2
     cmd: pytest scripts/tests/test_live_guard_contract.py -q
     expect: exit 0
-blocked_on: T-009
+cancelled_by: ACR-007 (no cEOS image; live run not done, code kept)
 out_of_scope:
   - IOS live restore (fails closed until a live IOS lab exists)
