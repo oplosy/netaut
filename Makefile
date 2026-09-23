@@ -61,27 +61,34 @@ LAB_LOGIN_srlinux := NokiaSrl1!
 LAB_VAULT ?= $(HOME)/.netaut/lab-vault-$(LAB).yml
 LAB_VAULT_PASS ?= $(HOME)/.netaut/vault_pass
 export CLAB_LABDIR_BASE ?= $(HOME)/.netaut/clab
+CLAB ?= containerlab
 WAVE ?= W-$(shell date +%Y%m%d-%H%M%S)
+
+ifeq ($(LAB_TOPO_$(LAB)),)
+$(error unknown LAB=$(LAB); use LAB=srlinux or LAB=eos)
+endif
 
 lab-up:
 	mkdir -p $(CLAB_LABDIR_BASE)
 	CEOS_IMAGE=$(CEOS_IMAGE) SRLINUX_IMAGE=$(SRLINUX_IMAGE) \
-	  containerlab deploy -t $(LAB_TOPO_$(LAB)) --reconfigure
+	  $(CLAB) deploy -t $(LAB_TOPO_$(LAB)) --reconfigure
 
 lab-down:
-	containerlab destroy -t $(LAB_TOPO_$(LAB)) --cleanup
+	$(CLAB) destroy -t $(LAB_TOPO_$(LAB)) --cleanup
 
+# The login goes by environment and the line is not echoed, so it shows up
+# neither in make output nor in the process list.
 lab-vault:
-	scripts/lab_vault.sh $(LAB_VAULT) $(LAB_VAULT_PASS) '$(LAB_LOGIN_$(LAB))'
+	@LAB_LOGIN='$(LAB_LOGIN_$(LAB))' scripts/lab_vault.sh $(LAB_VAULT) $(LAB_VAULT_PASS)
 
 lab-verify:
 	python3 scripts/lab_verify.py --inventory $(LAB_INV_$(LAB)) --wave $(WAVE) \
 	  --wait-port $(LAB_PORT_$(LAB)) --image $(LAB_IMAGE_$(LAB)) \
 	  --vault-args "-e @$(LAB_VAULT) --vault-password-file $(LAB_VAULT_PASS)"
 
-# One WSL session: up, vault, verify, always down; exit code is lab-verify's.
+# One WSL session: up, vault, verify, then always down, even when bring-up
+# fails; the exit code is the first failing step's.
 lab-cycle:
-	$(MAKE) lab-up LAB=$(LAB)
-	$(MAKE) lab-vault LAB=$(LAB)
-	$(MAKE) lab-verify LAB=$(LAB) WAVE=$(WAVE); rc=$$?; \
+	$(MAKE) lab-up LAB=$(LAB) && $(MAKE) lab-vault LAB=$(LAB) && \
+	  $(MAKE) lab-verify LAB=$(LAB) WAVE=$(WAVE); rc=$$?; \
 	  $(MAKE) lab-down LAB=$(LAB); exit $$rc
