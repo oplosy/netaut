@@ -839,14 +839,14 @@ def test_compare_catches_a_change_outside_the_parsed_fields(tmp_path):
 def test_compare_output_never_contains_config_content(tmp_path):
     """Review focus 4: backups hold hashed secrets; print names and counts only."""
     doc = load("clean.json")
-    secret = "$y$j9T$notarealhashbutlookslikeone"
+    hashed = "$y$j9T$notarealhashbutlookslikeone"
     doc["srl_nokia-system:system"]["aaa"] = {"authentication": {"user": [
-        {"username": "admin", "password": secret}]}}
+        {"username": "admin", "password": hashed}]}}
     other = tmp_path / "other.json"
     other.write_text(json.dumps(doc), encoding="utf-8")
     res = cli("--compare", FIX / "clean.json", other)
     assert res.returncode == 2
-    for needle in (secret, "10.0.0.53", "mgmt-uplink", "admin"):
+    for needle in (hashed, "10.0.0.53", "mgmt-uplink", "admin"):
         assert needle not in res.stdout + res.stderr
 
 
@@ -1030,7 +1030,7 @@ Run: `python -m pytest roles/live_guard/tests/test_srlinux_snapshot.py -q`
 Expected: 13 passed.
 
 Run: `python scripts/secret_scan.py --root .`
-Expected: exit 0 (the fixtures contain no `password:` assignments).
+Expected: exit 0 (fixtures and tests contain no password or secret assignments).
 
 - [ ] **Step 6: Commit**
 
