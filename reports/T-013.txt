@@ -1,0 +1,23 @@
+# T-013 evidence 2026-09-23T14:07:25+03:00
+    version: 0.77.0
+│             Name             │          Kind/Image          │  State  │ IPv4/6 Address │
+├──────────────────────────────┼──────────────────────────────┼─────────┼────────────────┤
+│ clab-netaut-srlinux-lab-sw01 │ nokia_srlinux                │ running │ 172.20.21.11   │
+│                              │ ghcr.io/nokia/srlinux:26.7.2 │         │ N/A            │
+├──────────────────────────────┼──────────────────────────────┼─────────┼────────────────┤
+│ clab-netaut-srlinux-lab-sw02 │ nokia_srlinux                │ running │ 172.20.21.12   │
+│                              │ ghcr.io/nokia/srlinux:26.7.2 │         │ N/A            │
+╰──────────────────────────────┴──────────────────────────────┴─────────┴────────────────╯
+scripts/lab_vault.sh /home/atlas/.netaut/lab-vault-srlinux.yml /home/atlas/.netaut/vault_pass 'NokiaSrl1!'
+lab-vault: created /home/atlas/.netaut/lab-vault-srlinux.yml (encrypted)
+ready: lab-sw01 lab-sw02 answer on 443
+│             Name             │          Kind/Image          │  State  │ IPv4/6 Address │
+├──────────────────────────────┼──────────────────────────────┼─────────┼────────────────┤
+│ clab-netaut-srlinux-lab-sw01 │ nokia_srlinux                │ running │ 172.20.21.11   │
+│                              │ ghcr.io/nokia/srlinux:26.7.2 │         │ N/A            │
+├──────────────────────────────┼──────────────────────────────┼─────────┼────────────────┤
+│ clab-netaut-srlinux-lab-sw02 │ nokia_srlinux                │ running │ 172.20.21.12   │
+│                              │ ghcr.io/nokia/srlinux:26.7.2 │         │ N/A            │
+╰──────────────────────────────┴──────────────────────────────┴─────────┴────────────────╯
+14:07:46 INFO Removing host entries path=/etc/hosts
+14:07:46 INFO Removing SSH config path=/etc/ssh/ssh_config.d/clab-netaut-srlinux.conf
