@@ -24,9 +24,12 @@
   delegate_to: localhost
   changed_when: false
 
-- name: Stat any existing backup for this wave
-  ansible.builtin.stat:
-    path: "{{ netaut_backup_dir }}/{{ inventory_hostname }}-{{ netaut_wave }}.{{ live_guard_ext }}"
+# Any extension counts: both labs use the same host names, so an eos backup
+# (cfg) must also block the same wave id on srlinux (json) and vice versa.
+- name: Find any existing backup for this wave
+  ansible.builtin.find:
+    paths: "{{ netaut_backup_dir }}"
+    patterns: "{{ inventory_hostname }}-{{ netaut_wave }}.*"
   delegate_to: localhost
   register: live_guard_backup_prior
 
@@ -35,7 +38,7 @@
 - name: Refuse to overwrite an existing backup (fail closed)
   ansible.builtin.assert:
     that:
-      - not live_guard_backup_prior.stat.exists
+      - live_guard_backup_prior.matched == 0
     fail_msg: "backup for wave {{ netaut_wave }} already exists on {{ inventory_hostname }}; use a new wave id"
 
 - name: Take pre-wave backup
