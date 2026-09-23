@@ -11,7 +11,7 @@ rules:
   devices:
     required: [name, site, platform, interfaces, common]
     site_must_reference: sites[].name
-    platform_allowed: [ios, eos]
+    platform_allowed: [ios, eos, srlinux]
     interfaces: each entry needs name; access_vlan must reference vlans[].id
     common: needs ntp_servers, dns_servers, syslog_servers (non-empty IP lists)
   # Optional since T-007 (REQ-008, ACR-004). Enforced by policy_check, not by

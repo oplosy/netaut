@@ -20,6 +20,7 @@ scan:
 validate:
 	python scripts/validate_model.py --schema netbox/schema.yml --input $(SAMPLE)
 	python scripts/validate_model.py --schema netbox/schema.yml --input netbox/intended/lab-eos.yml
+	python scripts/validate_model.py --schema netbox/schema.yml --input netbox/intended/lab-srlinux.yml
 
 render:
 	python scripts/render_idempotency.py --input $(SAMPLE) --vendor ios --repo .

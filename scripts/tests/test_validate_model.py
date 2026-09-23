@@ -29,3 +29,8 @@ def test_unknown_platform_rejected(tmp_path):
     res = run(bad)
     assert res.returncode == 1
     assert "disallowed platform" in res.stdout
+
+
+def test_srlinux_lab_intended_valid():
+    res = run(REPO / "netbox" / "intended" / "lab-srlinux.yml")
+    assert res.returncode == 0, res.stdout
