@@ -34,6 +34,9 @@ jobs:
       - name: Validate EOS lab intended state
         run: python scripts/validate_model.py --schema netbox/schema.yml --input netbox/intended/lab-eos.yml
 
+      - name: Validate SR Linux lab intended state
+        run: python scripts/validate_model.py --schema netbox/schema.yml --input netbox/intended/lab-srlinux.yml
+
       - name: Prove render idempotency
         run: python scripts/render_idempotency.py --input netbox/intended/sample.yml --vendor ios --repo .
 
