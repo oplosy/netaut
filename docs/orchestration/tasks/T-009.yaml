@@ -27,6 +27,6 @@ verify:
   - id: V1
     cmd: make lab-up && containerlab inspect -t lab/netaut.clab.yml
     expect: two nodes running
-blocked_on: OWNER imports the cEOS-lab image (free Arista account download)
+blocked_on: OWNER corporate Arista account (optional since ACR-006; personal e-mail is rejected)
 out_of_scope:
   - Running the lab in CI (image not redistributable)

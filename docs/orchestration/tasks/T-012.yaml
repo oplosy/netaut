@@ -1,0 +1,34 @@
+id: T-012
+title: SR Linux model, render, role dispatch and snapshot parser
+implements: [REQ-009]
+preserves: [INV-001, INV-002, INV-003, INV-004]
+addresses: [OPS-002]
+baseline: v1
+depends_on: [T-008]
+owns:
+  - netbox/
+  - templates/srlinux/
+  - roles/common/
+  - roles/vlan_interface/
+  - roles/live_guard/files/srlinux_snapshot.py
+  - roles/live_guard/tests/
+  - requirements.yml
+must_not_touch:
+  - templates/ios/
+  - templates/eos/
+shared_owner: false
+risk: MEDIUM
+review_required: false
+objective: >
+  srlinux is a valid platform with a render twin, role module calls and a
+  JSON snapshot parser, all proven device-less in CI.
+acceptance:
+  - id: A1
+    text: Model, render idempotency and all pytest suites pass with srlinux included.
+    verified_by: V1
+verify:
+  - id: V1
+    cmd: make gates
+    expect: exit 0
+out_of_scope:
+  - srlinux routing (render-only, fails closed)
