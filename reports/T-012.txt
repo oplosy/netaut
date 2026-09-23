@@ -1,0 +1,29 @@
+python -m yamllint -c .yamllint.yml .
+python scripts/secret_scan.py --root .
+secret-scan OK: no findings
+python scripts/validate_model.py --schema netbox/schema.yml --input netbox/intended/sample.yml
+validate OK: intended state satisfies schema
+python scripts/validate_model.py --schema netbox/schema.yml --input netbox/intended/lab-eos.yml
+validate OK: intended state satisfies schema
+python scripts/validate_model.py --schema netbox/schema.yml --input netbox/intended/lab-srlinux.yml
+validate OK: intended state satisfies schema
+python scripts/render_idempotency.py --input netbox/intended/sample.yml --vendor ios --repo .
+lab-sw01 routing/static.j2: IDENTICAL (171 bytes)
+lab-sw01 vlan_interface.j2: IDENTICAL (124 bytes)
+lab-sw02 routing/static.j2: IDENTICAL (171 bytes)
+lab-sw02 vlan_interface.j2: IDENTICAL (124 bytes)
+render-idempotency OK
+python scripts/render_idempotency.py --input netbox/intended/lab-eos.yml --vendor eos --repo .
+lab-sw01 routing/static.j2: IDENTICAL (173 bytes)
+lab-sw01 vlan_interface.j2: IDENTICAL (123 bytes)
+lab-sw02 routing/static.j2: IDENTICAL (173 bytes)
+lab-sw02 vlan_interface.j2: IDENTICAL (123 bytes)
+render-idempotency OK
+python scripts/render_idempotency.py --input netbox/intended/lab-srlinux.yml --vendor srlinux --repo .
+lab-sw01 vlan_interface.j2: IDENTICAL (421 bytes)
+lab-sw02 vlan_interface.j2: IDENTICAL (421 bytes)
+render-idempotency OK
+python -m pytest roles scripts/tests -q
+........................................................................ [ 78%]
+..s.................                                                     [100%]
+91 passed, 1 skipped in 4.90s
