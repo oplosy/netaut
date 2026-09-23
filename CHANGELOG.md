@@ -2,6 +2,12 @@
 
 Generated from commit history (`git log --oneline`).
 
+## Unreleased
+
+- Review T-015 minors fixed: lab login kept out of output, `lab-cycle` always tears down,
+  unknown `LAB=` stops clearly, wave ids unique across vendors, backup parsed before a
+  srlinux restore, parser errors print the type only, braces pinned in backup/fetch
+
 ## v1.1.0 (2026-09-23)
 
 Live lab release: EOS as a second vendor, SR Linux as a third with the first
