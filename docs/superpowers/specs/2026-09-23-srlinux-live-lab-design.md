@@ -184,3 +184,21 @@ Live tests in CI, routing in the live wave, OSPF/BGP, live IOS, removing EOS.
 
 ## OWNER prerequisites
 None. The image is pulled from `ghcr.io` without an account.
+
+## Amendments during planning (2026-09-23, from a throwaway spike on 26.7.2)
+- Vendor key is `srlinux`, not `srl`: vendor dispatch takes the last segment
+  of `ansible_network_os` (`nokia.srlinux.srlinux`). File names follow:
+  `lab-srlinux.yml`, `templates/srlinux/`, `srlinux_snapshot.py`, `LAB=srlinux`.
+- Root `replace /` is proven; the narrow-path fallback is dropped.
+- DNS is `/system/dns-instance[name=clab-default]` (no `/system/dns` on
+  26.7); the wave replaces its `server-list`.
+- An access port also sets `vlan-tagging: true` on the parent interface
+  (required for `untagged` encap).
+- The post-check fetches `/` (not five paths): backup, post-check and
+  restore proof share one JSON shape and one parser.
+- No `templates/srlinux/routing/static.j2`: an SR Linux prefix-set cannot
+  express a `deny` sequence, and routing is render-only and fails closed for
+  srlinux anyway.
+- Containerlab's lab dir must be on the Linux filesystem
+  (`CLAB_LABDIR_BASE`), and lab up/verify/down run in one WSL session
+  (`make lab-cycle`) because WSL stops idle VMs.

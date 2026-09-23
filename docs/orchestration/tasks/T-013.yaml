@@ -1,0 +1,32 @@
+id: T-013
+title: Containerlab SR Linux lab bring-up
+implements: [REQ-009]
+preserves: [INV-001]
+addresses: [OPS-001]
+baseline: v1
+depends_on: [T-012]
+owns:
+  - lab/netaut-srlinux.clab.yml
+  - inventories/lab-srlinux.yml
+  - scripts/lab_vault.sh
+  - scripts/lab_verify.py
+  - Makefile
+must_not_touch:
+  - roles/
+  - templates/
+shared_owner: false
+risk: LOW
+review_required: false
+objective: >
+  Two SR Linux nodes answer JSON-RPC with a vault-held login, brought up and
+  torn down by make targets from one WSL session.
+acceptance:
+  - id: A1
+    text: make lab-up LAB=srlinux yields two running nodes answering on 172.20.21.11/.12:443.
+    verified_by: V1
+verify:
+  - id: V1
+    cmd: make lab-up LAB=srlinux && containerlab inspect -t lab/netaut-srlinux.clab.yml
+    expect: two nodes running
+out_of_scope:
+  - Running the lab in CI (OWNER decision 2026-09-23)

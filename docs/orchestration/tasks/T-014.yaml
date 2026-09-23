@@ -1,0 +1,29 @@
+id: T-014
+title: Live SR Linux wave with real post-check
+implements: [REQ-004, REQ-009]
+preserves: [INV-001, INV-002]
+addresses: [OPS-001]
+baseline: v1
+depends_on: [T-013]
+owns:
+  - roles/live_guard/tasks/srlinux/fetch.yml
+  - roles/live_guard/tasks/postcheck.yml
+must_not_touch:
+  - templates/
+  - netbox/
+shared_owner: true
+risk: MEDIUM
+review_required: false
+objective: >
+  A live wave applies intended state to both nodes, the drift post-check
+  passes, and a rerun reports changed=0.
+acceptance:
+  - id: A1
+    text: lab-verify reports deploy PASS and rerun PASS on SR Linux.
+    verified_by: V1
+verify:
+  - id: V1
+    cmd: make lab-cycle LAB=srlinux
+    expect: deploy PASS, rerun PASS
+out_of_scope:
+  - Routing in the live wave
