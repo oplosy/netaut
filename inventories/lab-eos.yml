@@ -1,5 +1,5 @@
 # cEOS lab inventory (T-009, ADR-006). Connection details only; the login
-# comes from the encrypted ~/.netaut/lab-vault.yml at runtime (INV-001).
+# comes from the encrypted ~/.netaut/lab-vault-eos.yml at runtime (INV-001).
 all:
   children:
     lab:
