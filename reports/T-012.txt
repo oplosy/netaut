@@ -24,6 +24,6 @@ lab-sw01 vlan_interface.j2: IDENTICAL (421 bytes)
 lab-sw02 vlan_interface.j2: IDENTICAL (421 bytes)
 render-idempotency OK
 python -m pytest roles scripts/tests -q
-........................................................................ [ 78%]
-..s.................                                                     [100%]
-91 passed, 1 skipped in 4.90s
+........................................................................ [ 73%]
+.......s..................                                               [100%]
+97 passed, 1 skipped in 5.68s

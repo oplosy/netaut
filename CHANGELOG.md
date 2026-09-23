@@ -2,6 +2,15 @@
 
 Generated from commit history (`git log --oneline`).
 
+## Unreleased (SR Linux live lab, ACR-006)
+
+- T-012: srlinux platform, preview render, role module calls (nokia.srlinux 1.1.1), JSON snapshot parser
+- T-013: containerlab SR Linux topology, httpapi inventory, `LAB=` switch, readiness wait, `make lab-cycle`
+- T-014/T-015: live wave, drift post-check, root-replace restore with proof; first live evidence (SR Linux 26.7.2)
+- Fix: drift now reports intended interfaces missing on the device (all vendors)
+- Review: reports/reviews/T-015.md (1 critical + 4 important fixed, 7 minors deferred)
+- Decisions: ACR-006, ADR-007 (cEOS optional)
+
 ## Unreleased (cEOS live lab, ACR-005)
 
 - T-008: EOS render twins, per-role vendor dispatch, all-template render proof, device-less argspec proof in CI
