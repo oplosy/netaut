@@ -77,11 +77,13 @@ render-only: live mode fails closed there.
 - Forced post-check failure stops the wave, runs rollback, records FAILED (drilled).
 - Drift fixtures detected with read-only inputs (hashes untouched).
 - Module argument specs proven device-less (`playbooks/proof/rendered.yml`, eos in CI).
+- Live on SR Linux 26.7.2: wave applies, drift post-check passes, rerun `changed=0`, forced failure restores a byte-equal backup (`reports/T-014.txt`, `T-015.txt`).
 - Live mode fails closed without a wave id or for vendors without a restore path.
 - Role and gate test suites green (`make test`); hosted CI green; `pi_check all` green (12/12 gates, HIGH tier).
 
 See `docs/architecture.md` (ARCH_BASELINE v1), `docs/decisions/`,
-`reports/T-000.txt` … `reports/T-008.txt` (no T-006: dropped by ACR-003), and `docs/orchestration/`.
+`reports/T-000.txt` … `reports/T-015.txt` (no T-006: dropped by ACR-003; no T-009..T-011:
+cEOS live runs, optional), `reports/reviews/`, and `docs/orchestration/`.
 
 ## Scope phases
 

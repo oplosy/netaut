@@ -1,7 +1,7 @@
 # Wave runbook
 
-How to execute a change wave against the lab (when a live lab exists;
-currently all runs below are device-less unless noted).
+How to execute a change wave: device-less preview first (sections 1-2), then
+the live SR Linux lab (section 3, ACR-006).
 
 ## 1. Prepare
 
