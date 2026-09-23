@@ -50,6 +50,12 @@ def main(argv: list[str] | None = None) -> int:
         ("render-idempotency-eos", [sys.executable, "scripts/render_idempotency.py",
                                     "--input", "netbox/intended/lab-eos.yml",
                                     "--vendor", "eos", "--repo", "."]),
+        ("validate-model-srlinux", [sys.executable, "scripts/validate_model.py",
+                                    "--schema", "netbox/schema.yml",
+                                    "--input", "netbox/intended/lab-srlinux.yml"]),
+        ("render-idempotency-srlinux", [sys.executable, "scripts/render_idempotency.py",
+                                        "--input", "netbox/intended/lab-srlinux.yml",
+                                        "--vendor", "srlinux", "--repo", "."]),
         ("pytest", [sys.executable, "-m", "pytest", "roles", "scripts/tests", "-q"]),
     ]
     for name, cmd in gates:
