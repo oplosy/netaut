@@ -10,9 +10,9 @@ Owner automates lab network device config (NTP/DNS/Syslog, VLAN/interface)
 and wants the same change to be safe to re-run, blocked on conflict before
 touching devices, and fully traceable. ACR-003 dropped live execution (no
 licensed IOSv image); ACR-005 and ACR-006 brought it back on a free lab.
-Live waves run on Nokia SR Linux (ADR-007, proven 2026-09-23); cEOS is
-optional. Proof is CI (device-less) plus local live-lab evidence under
-`reports/`. Users: owner (operator) + CI (executor).
+Live waves run on Nokia SR Linux (ADR-007, proven 2026-09-23); cEOS code is
+kept but its live run was cancelled (ACR-007). Proof is CI (device-less)
+plus local live-lab evidence under `reports/`. Users: owner (operator) + CI (executor).
 Distribution: private repo, lab-only operation (ASM-001, ASM-003).
 
 ## Risk tier

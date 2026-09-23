@@ -27,6 +27,6 @@ verify:
   - id: V1
     cmd: make lab-up && containerlab inspect -t lab/netaut.clab.yml
     expect: two nodes running
-blocked_on: OWNER corporate Arista account (optional since ACR-006; personal e-mail is rejected)
+cancelled_by: ACR-007 (no cEOS image; live run not done, code kept)
 out_of_scope:
   - Running the lab in CI (image not redistributable)

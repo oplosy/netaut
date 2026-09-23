@@ -29,6 +29,6 @@ verify:
   - id: V1
     cmd: make lab-verify
     expect: deploy PASS, rerun PASS
-blocked_on: T-009
+cancelled_by: ACR-007 (no cEOS image; live run not done, code kept)
 out_of_scope:
   - Routing in live waves (render-only; recorded gap in ACR-005)
