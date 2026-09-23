@@ -144,3 +144,61 @@ def test_parse_does_not_mutate_its_input():
     before = copy.deepcopy(doc)
     srlinux_snapshot.parse(doc)
     assert doc == before
+
+
+def _drift_rc(doc, tmp_path):
+    src = tmp_path / "doc.json"
+    src.write_text(json.dumps(doc), encoding="utf-8")
+    out = tmp_path / "snap.json"
+    assert cli("--config", f"lab-sw01={src}", "--out", out).returncode == 0
+    return subprocess.run(
+        [sys.executable, str(DRIFT), "--intended", str(INTENDED), "--operational", str(out),
+         "--report", str(tmp_path / "r.md"), "--device", "lab-sw01", "--fail-on-drift"],
+        capture_output=True, text=True).returncode
+
+
+def test_tagged_routed_or_detached_port_fails_the_post_check(tmp_path):
+    """Review T-015 C1 / focus 5, end to end: parser + drift must return rc 2."""
+    tagged = load("clean.json")
+    tagged["srl_nokia-interfaces:interface"][0]["subinterface"][0][
+        "srl_nokia-interfaces-vlans:vlan"] = {"encap": {"single-tagged": {"vlan-id": 99}}}
+    routed = load("clean.json")
+    routed["srl_nokia-interfaces:interface"][0]["subinterface"][0]["type"] = "routed"
+    detached = load("clean.json")
+    detached["srl_nokia-network-instance:network-instance"][1]["interface"] = []
+    for doc in (tagged, routed, detached):
+        assert _drift_rc(doc, tmp_path) == 2
+
+
+def test_mixed_or_non_zero_index_port_is_not_an_access_port():
+    """Review T-015 I4: only a port whose sole subinterface is untagged .0 is access."""
+    mixed = load("clean.json")
+    mixed["srl_nokia-interfaces:interface"][0]["subinterface"].append(
+        {"index": 10, "type": "srl_nokia-interfaces:bridged",
+         "srl_nokia-interfaces-vlans:vlan": {"encap": {"single-tagged": {"vlan-id": 10}}}})
+    mixed["srl_nokia-network-instance:network-instance"].append(
+        {"name": "vlan-10", "type": "srl_nokia-network-instance:mac-vrf",
+         "interface": [{"name": "ethernet-1/1.10"}]})
+    assert srlinux_snapshot.parse(mixed)["interfaces"] == []
+    moved = load("clean.json")
+    moved["srl_nokia-interfaces:interface"][0]["subinterface"][0]["index"] = 5
+    moved["srl_nokia-network-instance:network-instance"][1]["interface"] = [
+        {"name": "ethernet-1/1.5"}]
+    assert srlinux_snapshot.parse(moved)["interfaces"] == []
+
+
+def test_compare_sees_differences_that_prefix_stripping_would_hide():
+    """Review T-015 I2: the restore proof compares raw documents."""
+    base = load("clean.json")
+    a = copy.deepcopy(base)
+    b = copy.deepcopy(base)
+    a["srl_nokia-a:extra"] = {"x": 1}
+    a["srl_nokia-b:extra"] = {"x": 2}
+    b["srl_nokia-a:extra"] = {"x": 9}
+    b["srl_nokia-b:extra"] = {"x": 2}
+    assert srlinux_snapshot.compare(a, b) == ["config sections differ: extra"]
+    c = copy.deepcopy(base)
+    c["srl_nokia-interfaces:interface"][0]["description"] = "srl_nokia-x:bar"
+    d = copy.deepcopy(base)
+    d["srl_nokia-interfaces:interface"][0]["description"] = "srl_nokia-y:bar"
+    assert srlinux_snapshot.compare(c, d) == ["config sections differ: interface"]

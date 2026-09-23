@@ -13,8 +13,8 @@ values are stripped of them before anything is read.
 
 Rules: a VLAN is a network-instance named `vlan-<id>` of type mac-vrf; its
 name is the description (or the instance name when unset). An access port is
-an interface whose subinterface is `bridged` with `untagged` encapsulation and
-is a member of such a mac-vrf. NTP/DNS/syslog keep IP values only; DNS is the
+an interface whose only subinterface is index 0, `bridged` with `untagged`
+encapsulation, and a member of such a mac-vrf. NTP/DNS/syslog keep IP values only; DNS is the
 union of every dns-instance's server-list.
 
 --compare (restore proof) checks the parsed fields AND the whole document
@@ -63,10 +63,14 @@ def parse(doc: dict) -> dict:
                for ip in inst.get("server-list", []))
     syslog = _ips(s.get("host") for s in system.get("logging", {}).get("remote-server", []))
 
+    # Access-port candidates: the interface's only subinterface is .0, bridged
+    # and untagged. A mixed port (extra tagged or routed subinterfaces) or an
+    # untagged member on another index is not what the role configures.
     members = {}
     for iface in doc.get("interface", []):
-        for sub in iface.get("subinterface", []):
-            members[f"{iface.get('name')}.{sub.get('index')}"] = (iface.get("name"), sub)
+        subs = iface.get("subinterface", [])
+        if len(subs) == 1 and subs[0].get("index") == 0:
+            members[f"{iface.get('name')}.0"] = (iface.get("name"), subs[0])
 
     vlans: dict[int, str] = {}
     ifaces: dict[str, int] = {}
@@ -100,8 +104,11 @@ def _read(path: str) -> dict:
 def compare(a: dict, b: dict) -> list[str]:
     pa, pb = parse(a), parse(b)
     diffs = [k for k in pa if pa[k] != pb[k]]
-    sa, sb = strip_prefixes(a), strip_prefixes(b)
-    sections = sorted(k for k in set(sa) | set(sb) if sa.get(k) != sb.get(k))
+    # Equality on the raw documents: both come from `get /` on the same device,
+    # and stripping could merge same-named keys or hide a value change. Only
+    # the printed section names drop their module prefix.
+    raw = {k for k in set(a) | set(b) if a.get(k) != b.get(k)}
+    sections = sorted({k.split(":", 1)[-1] for k in raw})
     if sections:
         diffs.append(f"config sections differ: {', '.join(sections)}")
     return diffs
