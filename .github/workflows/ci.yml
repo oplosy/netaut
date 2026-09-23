@@ -43,6 +43,9 @@ jobs:
       - name: Prove EOS render idempotency
         run: python scripts/render_idempotency.py --input netbox/intended/lab-eos.yml --vendor eos --repo .
 
+      - name: Prove SR Linux render idempotency
+        run: python scripts/render_idempotency.py --input netbox/intended/lab-srlinux.yml --vendor srlinux --repo .
+
       - name: Role and gate test suites
         run: python -m pytest roles scripts/tests -q
 
