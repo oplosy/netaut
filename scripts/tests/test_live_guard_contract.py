@@ -66,7 +66,29 @@ def test_backup_refuses_a_reused_wave_id():
     names = [t["name"] for t in tasks]
     refuse = names.index("Refuse to overwrite an existing backup (fail closed)")
     assert refuse < names.index("Take pre-wave backup")
-    assert "not live_guard_backup_prior.stat.exists" in tasks[refuse]["ansible.builtin.assert"]["that"]
+    assert "live_guard_backup_prior.matched == 0" in tasks[refuse]["ansible.builtin.assert"]["that"]
+
+
+def test_wave_id_is_unique_across_vendor_extensions():
+    """Review T-015 minor 2: an eos .cfg backup blocks the same wave id on srlinux."""
+    tasks = load(TASKS / "backup.yml")
+    find = next(t for t in tasks if t.get("register") == "live_guard_backup_prior")
+    args = find["ansible.builtin.find"]
+    assert args["paths"] == "{{ netaut_backup_dir }}"
+    assert args["patterns"] == "{{ inventory_hostname }}-{{ netaut_wave }}.*"
+    assert "use_regex" not in args
+
+
+def test_srlinux_restore_checks_the_backup_before_replacing():
+    """Review T-015 minor 4: a corrupt backup fails with a readable, secret-free step."""
+    tasks = load(TASKS / "srlinux" / "restore.yml")
+    names = [t["name"] for t in tasks]
+    check = next(t for t in tasks if "ansible.builtin.command" in t)
+    assert names.index(check["name"]) < names.index("Replace running datastore with backup")
+    assert "no_log" not in check
+    argv = check["ansible.builtin.command"]["argv"]
+    assert argv[1].endswith("srlinux_snapshot.py")
+    assert "{{ inventory_hostname }}={{ netaut_backup_file }}" in argv
 
 
 def test_restore_source_is_wrapped_in_raw():
