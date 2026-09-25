@@ -8,8 +8,8 @@ Statuses: ASSUMED | OWNER_DECISION_REQUIRED | CONFIRMED | REJECTED | EXTERNALLY_
 |----|----------|----------------------|-------------------|-----------------|-----------------|--------|--------|
 | ASM-001 | PRODUCT | Lab-only scope for initial implementation; no production devices touched | Containerlab with 2x SR Linux (ADR-007; cEOS optional) | Tier and rollback design change if prod added | OWNER | CONFIRMED | NO |
 | ASM-002 | TECHNICAL | Live IOSv lab dropped per ACR-003 (no licensed image, no pay); lab proof is fixtures + dry-run + drill | n/a | Superseded: free labs re-added by ACR-005 (cEOS) and ACR-006 (SR Linux) | OWNER | REJECTED | NO |
-| ASM-003 | PRODUCT | Repository stays private until license is selected | no public release | Publishing blocked until owner selects license | OWNER | OWNER_DECISION_REQUIRED | NO |
-| ASM-004 | TECHNICAL | NetBox is the intended-state source of truth | NetBox + YAML export cache | Data model and sync tasks change | ORCHESTRATOR | ASSUMED | NO |
+| ASM-003 | PRODUCT | License selected: MIT (`LICENSE`, 2026-09-25); publishing is the owner's call | MIT | n/a | OWNER | CONFIRMED | NO |
+| ASM-004 | TECHNICAL | NetBox is the intended-state source of truth; the repo consumes versioned YAML exports only (ADR-001), no NetBox API client is in scope | NetBox + YAML export cache | Data model and sync tasks change | ORCHESTRATOR | CONFIRMED | NO |
 | ASM-005 | RISK | Device secrets live in Vault / Ansible Vault, never in Git | Ansible Vault + CI masked vars | Secret handling and audit tasks change | OWNER | CONFIRMED | NO |
-| ASM-006 | TECHNICAL | Phase 1 NTP/DNS/Syslog, phase 2 VLAN/interface, phase 3 routing ACTIVE as static + prefix-list/route-map only (ACR-004); OSPF/BGP excluded | phase plan per REQ-008 | Task graph and gates change | ORCHESTRATOR | ASSUMED | NO |
+| ASM-006 | TECHNICAL | Phase 1 NTP/DNS/Syslog, phase 2 VLAN/interface, phase 3 routing ACTIVE as static + prefix-list/route-map only (ACR-004); OSPF/BGP excluded | phase plan per REQ-008 | Task graph and gates change | ORCHESTRATOR | CONFIRMED | NO |
 | ASM-007 | PRODUCT | Live device execution out of scope; proof chain is CI + dry-run + drill | fixtures only | Superseded by ACR-005/ACR-006: live waves run on a free SR Linux lab (T-012..T-015) | OWNER | REJECTED | NO |
