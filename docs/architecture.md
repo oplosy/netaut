@@ -32,7 +32,7 @@ byte-identical output (REQ-005). Breaking contract changes follow
 | drift job | operational facts | accidental push from drift | read-only credentials, no write tasks in drift role | REQ-006 |
 
 Lab image: SR Linux 26.7.2 and `nokia.srlinux` 1.1.1 pinned and proven live
-(ADR-007). UNVERIFIED: NetBox API version not externally checked (ASM-004).
+(ADR-007). No NetBox API client: the repo reads versioned YAML exports (ASM-004).
 Live backups hold hashed device secrets: kept under `~/.netaut` (0600), never
 in the repo or logs (`no_log`), compare output prints names only (INV-001).
 
@@ -69,6 +69,6 @@ this layout (see task specs).
 
 ## 8. Review before freezing
 Checked: no circular deps, no global state, no silent failure (fail closed),
-no prod blast radius (lab-only ASM-001), no license grant (private ASM-003).
-Open: NetBox API version UNVERIFIED; routing is static + policy only
+no prod blast radius (lab-only ASM-001), MIT license (ASM-003).
+Limits: routing is static + policy only
 (ACR-004) and render-only in live waves; OSPF/BGP excluded.
