@@ -62,7 +62,7 @@ make lab-cycle      # up -> vault -> drill (restore) -> deploy -> rerun changed=
 Step by step (keep one WSL session open; WSL stops idle VMs and their
 containers): `make lab-up`, `make lab-vault`, `make lab-verify`, `make lab-down`.
 `LAB=eos` runs the same on cEOS, which needs an image from a corporate
-arista.com account (T-009..T-011, optional).
+arista.com account; its live run was cancelled (T-009..T-011, ACR-007).
 
 A live wave is `-e netaut_mode=live -e netaut_wave=<id>`. It takes a backup
 first, post-checks real device state against intended state through the
@@ -83,9 +83,18 @@ render-only: live mode fails closed there.
 
 See `docs/architecture.md` (ARCH_BASELINE v1), `docs/decisions/`,
 `reports/T-000.txt` … `reports/T-015.txt` (no T-006: dropped by ACR-003; no T-009..T-011:
-cEOS live runs, optional), `reports/reviews/`, and `docs/orchestration/`.
+cEOS live runs, cancelled by ACR-007), `reports/reviews/`, and `docs/orchestration/`.
 
 ## Scope phases
 
 1. NTP / DNS / Syslog (done) → 2. VLAN / interface (done) → 3. Static routing + policy (done, REQ-008; OSPF/BGP excluded)
-→ 4. EOS vendor (done, T-008) → 5. Live lab with backup/restore: SR Linux done (T-012..T-015); cEOS built, optional (T-009..T-011).
+→ 4. EOS vendor (done, T-008) → 5. Live lab with backup/restore: SR Linux done (T-012..T-015); cEOS built, live run cancelled (T-009..T-011, ACR-007).
+
+## Project status
+
+Closed at v1.1.1 (2026-09-25). Every task is DONE or CANCELLED (T-009..T-011,
+ACR-007); no open requirements, assumptions or change requests.
+
+## License
+
+MIT, see `LICENSE`.

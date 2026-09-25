@@ -2,12 +2,17 @@
 
 Generated from commit history (`git log --oneline`).
 
-## Unreleased
+## v1.1.1 (2026-09-25)
+
+Project close release.
 
 - Review T-015 minors fixed: lab login kept out of output, `lab-cycle` always tears down,
   unknown `LAB=` stops clearly, wave ids unique across vendors, backup parsed before a
   srlinux restore, parser errors print the type only, braces pinned in backup/fetch
 - ACR-007: cEOS live-run tasks T-009..T-011 cancelled at project close (code kept)
+- MIT license added (ASM-003 confirmed); ASM-004/ASM-006 confirmed
+- Ansible collections pinned to the exact versions CI proved
+- Docs: open UNVERIFIED notes resolved, project status recorded
 
 ## v1.1.0 (2026-09-23)
 
